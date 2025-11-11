@@ -1,9 +1,9 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
-// use std::string::StartsWith;
 
 fn main() {
     let mut exit = true;
+    let builtins: [&str; 3] = ["echo", "exit", "type"];
 
     while exit {
         print!("$ ");
@@ -16,8 +16,18 @@ fn main() {
             exit = false;
         } else if command.trim().contains(' ') {
             let mut com_arr = command.trim().splitn(2, ' ');
-            if com_arr.next().unwrap() == "echo" {
-                println!("{}", com_arr.next().unwrap())
+            let com = com_arr.next().unwrap_or_default();
+            let term = com_arr.next().unwrap_or_default();
+            match com {
+               "echo" => println!("{}", term),
+               "type" => {
+                   if builtins.contains(&term) {
+                        println!("{} is a shell builtin", term)
+                   } else {
+                        println!("{}: not found", term)
+                   }
+               }
+               _ => {}
             }
         } else {
             println!("{}: command not found", command.trim());
