@@ -1,6 +1,7 @@
 use pathsearch::find_executable_in_path;
 #[allow(unused_imports)]
 use std::io::{self, Write};
+// test
 
 fn main() {
     let mut exit = true;
