@@ -26,7 +26,7 @@ fn main() {
             continue;
         }
         if let Some(path) = find_executable_in_path(&com_arr.0) {
-            Command::new(path)
+            Command::new(com_arr.0)
                 .args(com_arr.1.split(' '))
                 .status();
             // break;
