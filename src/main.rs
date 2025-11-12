@@ -28,8 +28,8 @@ fn main() {
         if let Some(path) = find_executable_in_path(&com_arr.0) {
             Command::new(path)
                 .args(com_arr.1.split(' '))
-                .output();
-            continue;
+                .status();
+            // break;
         } else {
             println!("{}: command not found", command.trim());
         }
