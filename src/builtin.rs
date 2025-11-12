@@ -26,7 +26,7 @@ pub fn check(com: &str, par: &str) -> bool {
         "comm" => (),
         "command" => (),
         "compress" => (),
-        "cp" => (),
+        "cpcp" => (), //ALERT THIS SHOULD JUST BE CP
         "cron" => (),
         "csplit" => (),
         "ctags" => (),
