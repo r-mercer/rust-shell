@@ -138,7 +138,7 @@ pub fn check(com: &str, par: &str) -> bool {
             } else if let Some(path) = find_executable_in_path(&par) {
                 println!("{} is {}", par, path.display());
             } else {
-                println!("{}: not found", com)
+                println!("{}: not found", par)
             }
         }
         "ulimit" => (),
@@ -182,7 +182,7 @@ static BUILTINS: [&str; 155] = [
     "bc",
     "bg",
     "cal",
-    "cat",
+    "catr", // ALERT THIS IS NOT RIGHT ALERT
     "cc",
     "cd",
     "cflow",
