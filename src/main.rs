@@ -29,6 +29,7 @@ fn main() {
             Command::new(path)
                 .args(com_arr.1.split(' '))
                 .spawn();
+            continue;
         } else {
             println!("{}: command not found", command.trim());
         }
