@@ -15,7 +15,10 @@ fn main() {
         io::stdin().read_line(&mut command).unwrap();
 
         // let com_arr = command.trim().split_once(' ').unwrap_();
-        let com_arr = command.trim().split_once(' ').unwrap_or_else(|| (command.trim(), ""));
+        let com_arr = command
+            .trim()
+            .split_once(' ')
+            .unwrap_or_else(|| (command.trim(), ""));
 
         if com_arr.0 == "exit" {
             // I think we can just break here??
@@ -26,9 +29,7 @@ fn main() {
             continue;
         }
         if let Some(path) = find_executable_in_path(&com_arr.0) {
-            Command::new(com_arr.0)
-                .args(com_arr.1.split(' '))
-                .status();
+            Command::new(com_arr.0).args(com_arr.1.split(' ')).status();
             // break;
         } else {
             println!("{}: command not found", command.trim());

@@ -1,4 +1,5 @@
 use pathsearch::find_executable_in_path;
+use std::env;
 
 pub fn check(com: &str, par: &str) -> bool {
     let mut success = true;
@@ -101,7 +102,13 @@ pub fn check(com: &str, par: &str) -> bool {
         "printf" => (),
         "prs" => (),
         "ps" => (),
-        "pwd" => (),
+        "pwd" => {
+            let path = env::current_dir();
+            match path {
+                Ok(v) => println!("{}", v.display()),
+                Err(e) => println!("{e:?}"),
+            }
+        }
         "read" => (),
         "readlink" => (),
         "realpath" => (),
@@ -173,7 +180,7 @@ pub fn check(com: &str, par: &str) -> bool {
 
 // should possibly be 156 with exit
 // static BUILTINS: [&str; 155] = [
-static BUILTINS: [&str; 3] = [
+static BUILTINS: [&str; 4] = [
     // "admin",
     // "alias",
     // "ar",
@@ -197,7 +204,7 @@ static BUILTINS: [&str; 3] = [
     // "comm",
     // "command",
     // "compress",
-    // // "cp",
+    // "cp",
     // "cron",
     // "csplit",
     // "ctags",
@@ -272,7 +279,7 @@ static BUILTINS: [&str; 3] = [
     // "printf",
     // "prs",
     // "ps",
-    // "pwd",
+    "pwd",
     // "read",
     // "readlink",
     // "realpath",
