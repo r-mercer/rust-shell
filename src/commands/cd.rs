@@ -7,6 +7,9 @@ pub fn cd(path: &str) {
     let mut dest = PathBuf::from(path);
     if dest.is_relative() {
         let mut cwd = env::current_dir().expect("issue with current path");
+        if dest.starts_with("./") {
+            dest.strip_prefix("./").expect("Issue with path prefix");
+        }
         while dest.starts_with("../") {
             dest.strip_prefix("../").expect("Issue with path prefix");
             cwd.pop();
@@ -23,9 +26,9 @@ pub fn cd(path: &str) {
 fn get_path(path: &str) -> Result<PathBuf, Error> {
     let mut dest = PathBuf::from(path);
     if dest.is_relative() {
-        // if dest.starts_with("./") {
-        //     dest.strip_prefix("./").expect("Issue with path prefix");
-        // }
+        if dest.starts_with("./") {
+            dest.strip_prefix("./").expect("Issue with path prefix");
+        }
         let mut cwd = env::current_dir()?;
         while dest.starts_with("../") {
             dest.strip_prefix("../").expect("Issue with path prefix");
