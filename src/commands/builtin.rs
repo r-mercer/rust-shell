@@ -20,7 +20,9 @@ pub fn check(com: &str, par: &str) -> bool {
         "cal" => (),
         "cat" => (),
         "cc" => (),
-        "cd" => cd::cd(par),
+        "cd" => {
+            cd::cd(par);
+        }
         "cflow" => (),
         "chgrp" => (),
         "chmod" => (),
