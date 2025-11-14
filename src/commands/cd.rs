@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 pub fn cd(path: &str) {
     let mut dest = PathBuf::from(path);
-    println!("Current passed path: {}", dest.to_string_lossy());
+    // println!("Current passed path: {}", dest.to_string_lossy());
     // if dest.is_relative() {
     //     println!("{}", dest.to_string_lossy());
     //     let mut cwd = env::current_dir().expect("issue with current path");
