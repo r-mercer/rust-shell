@@ -10,10 +10,12 @@ pub fn cd(path: &str) {
         if dest.starts_with("./") {
             dest.strip_prefix("./").expect("Issue with path prefix");
         }
-        while dest.starts_with("../") {
-            dest.strip_prefix("../").expect("Issue with path prefix");
-            cwd.pop();
-        }
+        // while dest.starts_with("../") {
+        //     println!("Up a dir");
+        //     dest.strip_prefix("../").expect("Issue with path prefix");
+        //     cwd.pop()
+        //     // println!("Up a dir");
+        // }
         dest = dest.join(cwd);
     }
     let res = set_current_dir(dest);
@@ -22,6 +24,8 @@ pub fn cd(path: &str) {
         Err(e) => println!("{}: No such file or directory", path),
     }
 }
+
+// fn check
 
 fn get_path(path: &str) -> Result<PathBuf, Error> {
     let mut dest = PathBuf::from(path);
