@@ -4,9 +4,18 @@ use std::io::Error;
 use std::path::PathBuf;
 
 pub fn cd(path: &str) {
-    let res = get_path(path);
+    let mut dest = PathBuf::from(path);
+    if dest.is_relative() {
+        let mut cwd = env::current_dir().expect("issue with current path");
+        while dest.starts_with("../") {
+            dest.strip_prefix("../").expect("Issue with path prefix");
+            cwd.pop();
+        }
+        dest = dest.join(cwd);
+    }
+    let res = set_current_dir(dest);
     match res {
-        Ok(y) => set_current_dir(y).expect("bad"),
+        Ok(y) => (),
         Err(e) => println!("{}: No such file or directory", path),
     }
 }
