@@ -1,10 +1,15 @@
-use std::env::{self, set_current_dir};
+use std::env::{home_dir, set_current_dir};
 // use std::error::Error;
-use std::io::Error;
+// use std::io::Error;
 use std::path::PathBuf;
 
 pub fn cd(path: &str) {
     let mut dest = PathBuf::from(path);
+    if dest.starts_with("~") {
+        dest.strip_prefix("~").expect("cannot update path");
+        dest = home_dir().expect("no home dir");
+        set_current_dir(&dest).expect("No Home Dir");
+    }
     // println!("Current passed path: {}", dest.to_string_lossy());
     // if dest.is_relative() {
     //     println!("{}", dest.to_string_lossy());
@@ -23,26 +28,32 @@ pub fn cd(path: &str) {
     // dest.push(dest);
     let res = set_current_dir(dest);
     match res {
-        Ok(y) => (),
-        Err(e) => println!("{}: No such file or directory", path),
+        Ok(()) => (),
+        Err(e) => {
+            let mut var = e.to_string();
+            println!(
+                "{}: No such file or directory",
+                var.get_mut(0..25).expect("err")
+            );
+        }
     }
 }
 
-fn get_path(path: &str) -> Result<PathBuf, Error> {
-    let mut dest = PathBuf::from(path);
-    if dest.is_relative() {
-        if dest.starts_with("./") {
-            dest.strip_prefix("./").expect("Issue with path prefix");
-        }
-        let mut cwd = env::current_dir()?;
-        while dest.starts_with("../") {
-            dest.strip_prefix("../").expect("Issue with path prefix");
-            cwd.pop();
-        }
-        dest = dest.join(cwd);
-    }
-    Ok(dest)
-}
+// fn get_path(path: &str) -> Result<PathBuf, Error> {
+//     let mut dest = PathBuf::from(path);
+//     if dest.is_relative() {
+//         if dest.starts_with("./") {
+//             dest.strip_prefix("./").expect("Issue with path prefix");
+//         }
+//         let mut cwd = env::current_dir()?;
+//         while dest.starts_with("../") {
+//             dest.strip_prefix("../").expect("Issue with path prefix");
+//             cwd.pop();
+//         }
+//         dest = dest.join(cwd);
+//     }
+//     Ok(dest)
+// }
 // pub fn handle_path(mut pwd: PathBuf, dest: &str) -> PathBuf {
 //     if dest_path.is_absolute() {
 //         set_current_dir(dest_path);
