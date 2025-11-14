@@ -1,8 +1,10 @@
-use pathsearch::find_executable_in_path;
 #[allow(unused_imports)]
+use pathsearch::find_executable_in_path;
 use std::io::{self, Write};
 use std::process::Command;
-mod builtin;
+
+use crate::commands::builtin;
+mod commands;
 
 fn main() {
     let mut exit = true;

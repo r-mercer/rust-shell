@@ -1,6 +1,9 @@
 use pathsearch::find_executable_in_path;
-use std::env;
+use std::env::{self};
 
+use crate::commands::cd;
+
+// pub fn check(com: &str, par: &str) -> Result<T, E> {
 pub fn check(com: &str, par: &str) -> bool {
     let mut success = true;
     match com {
@@ -17,7 +20,7 @@ pub fn check(com: &str, par: &str) -> bool {
         "cal" => (),
         "cat" => (),
         "cc" => (),
-        "cd" => (),
+        "cd" => cd::cd(par),
         "cflow" => (),
         "chgrp" => (),
         "chmod" => (),
@@ -180,7 +183,7 @@ pub fn check(com: &str, par: &str) -> bool {
 
 // should possibly be 156 with exit
 // static BUILTINS: [&str; 155] = [
-static BUILTINS: [&str; 4] = [
+static BUILTINS: [&str; 5] = [
     // "admin",
     // "alias",
     // "ar",
@@ -194,7 +197,7 @@ static BUILTINS: [&str; 4] = [
     // "cal",
     // "cat", // ALERT THIS IS NOT RIGHT ALERT
     // "cc",
-    // "cd",
+    "cd",
     // "cflow",
     // "chgrp",
     // "chmod",
@@ -337,3 +340,11 @@ static BUILTINS: [&str; 4] = [
     // "yacc",
     // "zcat",
 ];
+
+// pub fn get_pwd() -> Result<PathBuf, VarError> {
+//     let path = env::current_dir();
+// println!("{}", path.display());
+// match path {
+//     Ok(v) => println!("{}", v.display()),
+//     Err(e) => println!("{e:?}"),
+// }
