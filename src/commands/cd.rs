@@ -5,27 +5,28 @@ use std::path::PathBuf;
 
 pub fn cd(path: &str) {
     let mut dest = PathBuf::from(path);
-    if dest.is_relative() {
-        let mut cwd = env::current_dir().expect("issue with current path");
-        if dest.starts_with("./") {
-            dest.strip_prefix("./").expect("Issue with path prefix");
-        }
-        // while dest.starts_with("../") {
-        //     println!("Up a dir");
-        //     dest.strip_prefix("../").expect("Issue with path prefix");
-        //     cwd.pop()
-        //     // println!("Up a dir");
-        // }
-        dest = dest.join(cwd);
-    }
+    println!("Current passed path: {}", dest.to_string_lossy());
+    // if dest.is_relative() {
+    //     println!("{}", dest.to_string_lossy());
+    //     let mut cwd = env::current_dir().expect("issue with current path");
+    //     if dest.starts_with("./") {
+    //         &dest.strip_prefix("./").expect("Issue with path prefix");
+    //     }
+    //     while let mut pre = dest.starts_with("../") {
+    //         println!("Up a dir");
+    //         dest.strip_prefix("../").expect("Issue with path prefix");
+    //         cwd.pop();
+    //         pre = dest.starts_with("../")
+    //     }
+    //     dest = dest.join(cwd);
+    // }
+    // dest.push(dest);
     let res = set_current_dir(dest);
     match res {
         Ok(y) => (),
         Err(e) => println!("{}: No such file or directory", path),
     }
 }
-
-// fn check
 
 fn get_path(path: &str) -> Result<PathBuf, Error> {
     let mut dest = PathBuf::from(path);
