@@ -32,8 +32,9 @@ pub fn cd(path: &str) {
         Err(e) => {
             let mut var = e.to_string();
             println!(
-                "{}: No such file or directory",
-                var.get_mut(0..25).expect("err")
+                "cd: {}: {}",
+                path,
+                var.get_mut(0..25).expect("err") // this just returns no such file....
             );
         }
     }
