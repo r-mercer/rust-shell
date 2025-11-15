@@ -1,3 +1,4 @@
+use std::char;
 use std::env::{home_dir, set_current_dir};
 // use std::error::Error;
 // use std::io::Error;
@@ -76,28 +77,31 @@ pub fn cat(str: &str) {
     list.args(strs).status().expect("file contents");
 }
 
-pub fn parse_param(par: &str) -> Vec<&str> {
-    let strs: Vec<&str>;
-    if !par.contains("'") {
-        strs = par.split_whitespace().collect();
-    } else {
-        // while par.len()gc
-        strs = par
-            .trim()
-            .split('\'')
-            // .split_terminator('\'')
-            .filter(|x| !x.is_empty())
-            .collect();
-        let st = strs.clone();
-        for p in st {
-            println!("{p}")
-        }
-        // println!("Len: {}", strs.len());
+pub fn parse_param(mut par: &str) -> Vec<&str> {
+    let mut strs: Vec<&str> = Vec::new();
+    par = par.trim();
+    // println!("par starting val: {}", par);
+    while !par.is_empty() {
+        // println!("do we test this again??");
+        let c: char = match par.starts_with("'") {
+            true => '\'',
+            false => ' ',
+        };
+        // println!("c cur val: {}", c);
+        par = par.trim().strip_prefix(c).unwrap_or(par);
+        // println!("par post prefix strip val: {}", par);
+        let ind = par.find(c).unwrap_or(par.len());
+        // println!("first int find valk: {}", ind);
+        let (a, b) = par.split_at(ind);
+        // println!("a cur val: {}", a);
+        strs.push(a);
+        // println!("b cur val: {}", b);
+        par = b.strip_prefix('\'').unwrap_or(b).trim();
     }
-    // let strs: Vec<&str> = par.split_whitespace().collect();
+    // println!("return val: {}", strs.len());
     strs
 }
-
+// fn get_pars(mut pars: )
 // fn get_path(path: &str) -> Result<PathBuf, Error> {
 //     let mut dest = PathBuf::from(path);
 //     if dest.is_relative() {
