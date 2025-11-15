@@ -42,8 +42,8 @@ pub fn cd(path: &str) {
 }
 
 pub fn echo(str: &str) {
-    let mut var = String::new();
-    if str.contains("  ") && !str.starts_with("'") {
+    let mut var = String::from(str);
+    if var.contains("  ") && !var.starts_with("'") {
         let st = str.split_whitespace();
         var = st.map(|n| format!("{} ", n)).collect();
     }
