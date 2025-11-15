@@ -64,8 +64,8 @@ pub fn echo(str: &str) {
 
 pub fn cat(str: &str) {
     let mut list = Command::new("cat");
-    let strs: Vec<&str> = str.split_inclusive(" '").collect();
-    // let strg = strs.iter().map(|f| f.replace(['"', '\''], ""));
+    let mut strs: Vec<&str> = str.split_inclusive(" '").collect();
+    let strs = strs.iter().map(|f| f.replace(['"', '\''], ""));
     // let strg = strs.iter().map(|f| f.replace(['"', '\''], ""));
     // let st = strg.split_whitespace();
     // list.arg(str).status().expect("file contents");
