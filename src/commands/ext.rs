@@ -66,13 +66,30 @@ pub fn cat(str: &str) {
     let mut list = Command::new("cat");
     // println!("{}", str);
     // let strs: Vec<&str> = str.split_inclusive(" '").collect();
-    let strs: Vec<&str> = str.split_whitespace().collect();
-    // let strs = strs.iter().collect::<Vec<&str>>();
+    let strs: Vec<&str> = parse_param(str);
+    // str.split_whitespace().collect();
+    // // let strs = strs.iter().collect::<Vec<&str>>();
 
     // let strg = strs.iter().map(|f| f.replace(['"', '\''], ""));
     // let st = strg.split_whitespace();
     // list.arg(str).status().expect("file contents");
     list.args(strs).status().expect("file contents");
+}
+
+pub fn parse_param(par: &str) -> Vec<&str> {
+    let strs: Vec<&str>;
+    if !par.contains("'") {
+        strs = par.split_whitespace().collect();
+    } else {
+        strs = par
+            .trim()
+            .split_terminator('\'')
+            .filter(|x| !x.is_empty())
+            .collect();
+        // println!("Len: {}", strs.len());
+    }
+    // let strs: Vec<&str> = par.split_whitespace().collect();
+    strs
 }
 
 // fn get_path(path: &str) -> Result<PathBuf, Error> {
