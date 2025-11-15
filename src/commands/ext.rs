@@ -42,15 +42,26 @@ pub fn cd(path: &str) {
 }
 
 pub fn echo(str: &str) {
-    let mut var = str.trim_start_matches('"').trim_start_matches('\'');
-    var = var.trim_end_matches('"').trim_end_matches('\'');
-    let mut var2 = var.replace("''", "").replace("''", "");
-    if var2.contains("  ") {
+    let mut var2 = str.replace("''", "").replace("''", "");
+    if var2.contains("  ") && !var2.starts_with("'") {
         let st = var2.split_whitespace();
         var2 = st.map(|n| format!("{} ", n)).collect();
     }
-    println!("{}", var2.trim())
+    let mut var = var2.trim_start_matches('"').trim_start_matches('\'');
+    var = var.trim_end_matches('"').trim_end_matches('\'');
+    println!("{}", var.trim())
 }
+
+// pub fn echo(str: &str) {
+//     let mut var = str.trim_start_matches('"').trim_start_matches('\'');
+//     var = var.trim_end_matches('"').trim_end_matches('\'');
+//     let mut var2 = var.replace("''", "").replace("''", "");
+//     if var2.contains("  ") {
+//         let st = var2.split_whitespace();
+//         var2 = st.map(|n| format!("{} ", n)).collect();
+//     }
+//     println!("{}", var2.trim())
+// }
 
 pub fn cat(str: &str) {
     let mut list = Command::new("cat");
