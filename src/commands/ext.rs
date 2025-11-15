@@ -64,8 +64,11 @@ pub fn echo(str: &str) {
 
 pub fn cat(str: &str) {
     let mut list = Command::new("cat");
-    list.arg(str).status().expect("file contents");
-    println!();
+    let strs: Vec<&str> = str.split_inclusive(" '").collect();
+    let strg = strs.iter().map(|f| f.replace(['"', '\''], ""));
+    // let st = strg.split_whitespace();
+    // list.arg(str).status().expect("file contents");
+    list.args(strg).status().expect("file contents");
 }
 
 // fn get_path(path: &str) -> Result<PathBuf, Error> {
