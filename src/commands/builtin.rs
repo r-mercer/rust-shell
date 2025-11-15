@@ -183,7 +183,7 @@ pub fn check(com: &str, par: &str) -> bool {
 
 // should possibly be 156 with exit
 // static BUILTINS: [&str; 155] = [
-static BUILTINS: [&str; 6] = [
+static BUILTINS: [&str; 5] = [
     // "admin",
     // "alias",
     // "ar",
@@ -195,7 +195,7 @@ static BUILTINS: [&str; 6] = [
     // "bc",
     // "bg",
     // "cal",
-    "cat", // ALERT THIS IS NOT RIGHT ALERT
+    // "cat", // ALERT THIS IS NOT RIGHT ALERT
     // "cc",
     "cd",
     // "cflow",
