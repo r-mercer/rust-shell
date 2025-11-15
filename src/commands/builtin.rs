@@ -1,7 +1,7 @@
 use pathsearch::find_executable_in_path;
 use std::env::{self};
 
-use crate::commands::cd;
+use crate::commands::ext;
 
 // pub fn check(com: &str, par: &str) -> Result<T, E> {
 pub fn check(com: &str, par: &str) -> bool {
@@ -18,10 +18,10 @@ pub fn check(com: &str, par: &str) -> bool {
         "bc" => (),
         "bg" => (),
         "cal" => (),
-        "cat" => (),
+        "cat" => ext::cat(par),
         "cc" => (),
         "cd" => {
-            cd::cd(par);
+            ext::cd(par);
         }
         "cflow" => (),
         "chgrp" => (),
@@ -45,7 +45,7 @@ pub fn check(com: &str, par: &str) -> bool {
         "diff" => (),
         "dirname" => (),
         "du" => (),
-        "echo" => println!("{}", par),
+        "echo" => ext::echo(par),
         "ed" => (),
         "env" => (),
         "ex" => (),

@@ -2,6 +2,7 @@ use std::env::{home_dir, set_current_dir};
 // use std::error::Error;
 // use std::io::Error;
 use std::path::PathBuf;
+use std::process::Command;
 
 pub fn cd(path: &str) {
     let mut dest = PathBuf::from(path);
@@ -38,6 +39,19 @@ pub fn cd(path: &str) {
             );
         }
     }
+}
+
+pub fn echo(str: &str) {
+    let mut var = str.trim_start_matches('"').trim_start_matches('\'');
+    var = var.trim_end_matches('"').trim_end_matches('\'');
+    let var2 = var.replace("''", "").replace("''", "");
+    println!("{}", var2)
+}
+
+pub fn cat(str: &str) {
+    let mut list = Command::new("cat");
+    list.arg(str).status().expect("file contents");
+    println!();
 }
 
 // fn get_path(path: &str) -> Result<PathBuf, Error> {
