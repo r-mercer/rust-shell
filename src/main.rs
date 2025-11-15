@@ -30,14 +30,13 @@ fn main() {
         if builtin::check(com_arr.0, com_arr.1) {
             continue;
         }
-        let path = find_executable_in_path(&com_arr.0).expect("Command not found");
-        {
-            Command::new(com_arr.0)
+        if let Some(path) = find_executable_in_path(&com_arr.0) {
+            Command::new(path)
                 .args(com_arr.1.split(' '))
                 .status()
                 .expect("Command not found");
-
-            // Err(println!("{}: command not found", com_arr.0)); // break;
+        } else {
+            println!("{}: command not found", com_arr.0);
         }
     }
 }
