@@ -81,11 +81,17 @@ pub fn parse_param(par: &str) -> Vec<&str> {
     if !par.contains("'") {
         strs = par.split_whitespace().collect();
     } else {
+        // while par.len()gc
         strs = par
             .trim()
-            .split_terminator('\'')
+            .split('\'')
+            // .split_terminator('\'')
             .filter(|x| !x.is_empty())
             .collect();
+        let st = strs.clone();
+        for p in st {
+            println!("{p}")
+        }
         // println!("Len: {}", strs.len());
     }
     // let strs: Vec<&str> = par.split_whitespace().collect();
