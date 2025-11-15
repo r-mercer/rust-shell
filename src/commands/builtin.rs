@@ -20,9 +20,7 @@ pub fn check(com: &str, par: &str) -> bool {
         "cal" => (),
         "cat" => ext::cat(par),
         "cc" => (),
-        "cd" => {
-            ext::cd(par);
-        }
+        "cd" => ext::cd(par),
         "cflow" => (),
         "chgrp" => (),
         "chmod" => (),
@@ -185,7 +183,7 @@ pub fn check(com: &str, par: &str) -> bool {
 
 // should possibly be 156 with exit
 // static BUILTINS: [&str; 155] = [
-static BUILTINS: [&str; 5] = [
+static BUILTINS: [&str; 6] = [
     // "admin",
     // "alias",
     // "ar",
@@ -197,7 +195,7 @@ static BUILTINS: [&str; 5] = [
     // "bc",
     // "bg",
     // "cal",
-    // "cat", // ALERT THIS IS NOT RIGHT ALERT
+    "cat", // ALERT THIS IS NOT RIGHT ALERT
     // "cc",
     "cd",
     // "cflow",
