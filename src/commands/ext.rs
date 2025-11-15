@@ -42,13 +42,12 @@ pub fn cd(path: &str) {
 }
 
 pub fn echo(str: &str) {
-    let mut var2 = str.replace("''", "").replace("''", "");
-    if var2.contains("  ") && !var2.starts_with("'") {
-        let st = var2.split_whitespace();
-        var2 = st.map(|n| format!("{} ", n)).collect();
+    let mut var = String::new();
+    if str.contains("  ") && !str.starts_with("'") {
+        let st = str.split_whitespace();
+        var = st.map(|n| format!("{} ", n)).collect();
     }
-    let mut var = var2.trim_start_matches('"').trim_start_matches('\'');
-    var = var.trim_end_matches('"').trim_end_matches('\'');
+    var = var.replace(['"', '\''], "");
     println!("{}", var.trim())
 }
 
