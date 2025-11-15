@@ -44,8 +44,12 @@ pub fn cd(path: &str) {
 pub fn echo(str: &str) {
     let mut var = str.trim_start_matches('"').trim_start_matches('\'');
     var = var.trim_end_matches('"').trim_end_matches('\'');
-    let var2 = var.replace("''", "").replace("''", "");
-    println!("{}", var2)
+    let mut var2 = var.replace("''", "").replace("''", "");
+    if var2.contains("  ") {
+        let st = var2.split_whitespace();
+        var2 = st.map(|n| format!("{} ", n)).collect();
+    }
+    println!("{}", var2.trim())
 }
 
 pub fn cat(str: &str) {
