@@ -53,21 +53,26 @@ fn get_next_param(mut par: &str) -> (String, &str) {
         Some("\"") => '"',
         _ => ' ',
     };
+
     par = par.strip_prefix(c).unwrap_or(par);
     let ind = par.find(c).unwrap_or(par.len());
     let (a, b) = par.split_at(ind);
     let mut para = String::from(a);
+    if c != '"' {
+        para = para.replace('\\', "");
+    }
     para = para.replace("\"\"", "").replace("''", "");
     let mut parb = b.strip_prefix(c).unwrap_or(b);
+
     if parb.starts_with(['\'', '"']) {
         let (d, e) = get_next_param(parb);
         para += d.as_str();
         parb = e;
-        // } else {
-        //     parb = parb.trim();
     }
     (para, parb)
 }
+
+// fn check_escape() {}
 //     let c: char = match par.get(0..1) {
 //         Some("'") => '\'',
 //         Some("\"") => '"',
