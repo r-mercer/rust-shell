@@ -33,6 +33,7 @@ pub fn echo(str: &str) {
     //     var = st.map(|n| format!("{} ", n)).collect();
     // }
     // var = var.replace(['"', '\''], "");
+    println!("strs curr leg: {}", params.len());
     for par in params {
         println!("{}", par)
     }
@@ -61,11 +62,13 @@ pub fn parse_param(mut par: &str) -> Vec<&str> {
             Some("\"") => '"',
             _ => ' ',
         };
+        println!("c curr val: {}", c);
+        println!("strs curr leg: {}", strs.len());
         par = par.trim().strip_prefix(c).unwrap_or(par);
         let ind = par.find(c).unwrap_or(par.len());
         let (a, b) = par.split_at(ind);
         strs.push(a);
-        par = b.strip_prefix('\'').unwrap_or(b).trim();
+        par = b.strip_prefix(c).unwrap_or(b).trim();
     }
     strs
 }
