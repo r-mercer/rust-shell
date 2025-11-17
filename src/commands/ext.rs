@@ -29,15 +29,6 @@ pub fn cd(path: &str) {
 pub fn echo(str: &str) {
     let params = parse_param(str);
     println!("{}", params.join(" "));
-    // if var.contains("  ") && !var.starts_with("'") {
-    //     let st = str.split_whitespace();
-    //     var = st.map(|n| format!("{} ", n)).collect();
-    // }
-    // var = var.replace(['"', '\''], "");
-    // println!("strs curr leg: {}", params.len());
-    // for par in params {
-    //     print!("{}", par)
-    // }
 }
 
 pub fn cat(str: &str) {
@@ -47,33 +38,46 @@ pub fn cat(str: &str) {
 }
 
 pub fn parse_param(mut par: &str) -> Vec<String> {
-    let mut strs: Vec<String> = Vec::new();
+    let mut retvec: Vec<String> = Vec::new();
     while !par.is_empty() {
         let (a, b) = get_next_param(par);
-        let mut ret = String::from(a);
+        retvec.push(a);
         par = b;
-        while par.starts_with("'") || par.starts_with("\"") {
-            let (a, b) = get_next_param(par);
-            ret.push_str(a);
-            par = b;
-        }
-        strs.push(ret);
     }
-    strs
+    retvec
 }
-fn get_next_param(mut par: &str) -> (&str, &str) {
-    par = par.trim();
-    let c: char = match par.get(0..1) {
+
+fn get_next_param(mut par: &str) -> (String, &str) {
+    let c: char = match par.trim().get(0..1) {
         Some("'") => '\'',
         Some("\"") => '"',
         _ => ' ',
     };
     par = par.strip_prefix(c).unwrap_or(par);
     let ind = par.find(c).unwrap_or(par.len());
-    let (ret, b) = par.split_at(ind);
-    par = b.strip_prefix(c).unwrap_or(b);
-    (ret, par)
+    let (a, b) = par.split_at(ind);
+    let mut para = String::from(a);
+    let mut parb = b.strip_prefix(c).unwrap_or(b);
+    // println!("a: {}, b: {}", a, parb);
+    if parb.starts_with(['\'', '"']) {
+        let (c, d) = get_next_param(parb);
+        para += c.as_str();
+        parb = d;
+    }
+    (para, parb)
 }
+//     let c: char = match par.get(0..1) {
+//         Some("'") => '\'',
+//         Some("\"") => '"',
+//         _ => ' ',
+//     };
+//     par = par.strip_prefix(c).unwrap_or(par);
+//     let ind = par.find(c).unwrap_or(par.len());
+//     let (ret, b) = par.split_at(ind);
+//     par = b.strip_prefix(c).unwrap_or(b);
+//     if
+//     (ret, par)
+// }
 // fn get_pars(mut pars: )
 // fn get_path(path: &str) -> Result<PathBuf, Error> {
 //     let mut dest = PathBuf::from(path);
