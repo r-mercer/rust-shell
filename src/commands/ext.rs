@@ -44,7 +44,7 @@ pub fn cat(str: &str) {
     let mut list = Command::new("cat");
     // println!("{}", str);
     // let strs: Vec<&str> = str.split_inclusive(" '").collect();
-    let strs: Vec<&str> = parse_param(str);
+    let strs: Vec<String> = parse_param(str);
     // str.split_whitespace().collect();
     // // let strs = strs.iter().collect::<Vec<&str>>();
 
@@ -54,24 +54,45 @@ pub fn cat(str: &str) {
     list.args(strs).status().expect("file contents");
 }
 
-pub fn parse_param(mut par: &str) -> Vec<&str> {
-    let mut strs: Vec<&str> = Vec::new();
-    par = par.trim();
+pub fn parse_param(mut par: &str) -> Vec<String> {
+    let mut strs: Vec<String> = Vec::new();
     while !par.is_empty() {
-        let c: char = match par.get(0..1) {
-            Some("'") => '\'',
-            Some("\"") => '"',
-            _ => ' ',
-        };
-        // println!("c curr val: {}", c);
-        // println!("strs curr leg: {}", strs.len());
-        par = par.trim().strip_prefix(c).unwrap_or(par);
-        let ind = par.find(c).unwrap_or(par.len());
-        let (a, b) = par.split_at(ind);
-        strs.push(a);
-        par = b.strip_prefix(c).unwrap_or(b).trim();
+        let (a, b) = get_next_param(par.trim());
+        par = b.trim();
+        let mut ret = String::from(a);
+        while par.starts_with("'") || par.starts_with("\"") {
+            let (a, b) = get_next_param(par);
+            ret.push_str(a);
+            par = b;
+        }
+        strs.push(ret);
     }
     strs
+}
+
+fn get_next_param(mut par: &str) -> (&str, &str) {
+    println!("get_next_param passed: {}", par);
+    let c: char = match par.get(0..1) {
+        Some("'") => '\'',
+        Some("\"") => '"',
+        _ => ' ',
+    };
+    par = par.trim().strip_prefix(c).unwrap_or(par);
+    println!("par post trim: {}", par);
+    let ind = par.find(c).unwrap_or(par.len());
+    let (ret, b) = par.split_at(ind);
+    println!("par b prefix trim: {}", b);
+    par = b.trim().strip_prefix(c).unwrap_or(b);
+    println!("par post prefix trim: {}", par);
+    // while !par.starts_with(" ") {
+    //     let mut strs: Vec<&str> = vec![ret];
+    //     let (a, b) = get_next_param(par);
+    //     strs.push(a);
+    //     par = b;
+    // }
+    println!("get_next_param return par: {}", par);
+    println!("get_next_param return ret: {}", ret);
+    (ret, par)
 }
 // fn get_pars(mut pars: )
 // fn get_path(path: &str) -> Result<PathBuf, Error> {
