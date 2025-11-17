@@ -57,10 +57,12 @@ fn get_next_param(mut par: &str) -> (String, &str) {
     let ind = par.find(c).unwrap_or(par.len());
     let (a, b) = par.split_at(ind);
     let mut para = String::from(a);
-    let mut parb = b.strip_prefix(c).unwrap_or(b);
+    para = para.replace("\"\"", "");
+    let mut parb = b.strip_prefix(c).unwrap_or(b).trim();
     // println!("a: {}, b: {}", para, parb);
     if parb.starts_with(['\'', '"']) {
         let (c, d) = get_next_param(parb);
+        // println!("c: {}, d: {}", c, d);
         para += c.as_str();
         parb = d;
     }
