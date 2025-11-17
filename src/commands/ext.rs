@@ -28,15 +28,16 @@ pub fn cd(path: &str) {
 
 pub fn echo(str: &str) {
     let params = parse_param(str);
+    println!("{}", params.join(" "));
     // if var.contains("  ") && !var.starts_with("'") {
     //     let st = str.split_whitespace();
     //     var = st.map(|n| format!("{} ", n)).collect();
     // }
     // var = var.replace(['"', '\''], "");
     // println!("strs curr leg: {}", params.len());
-    for par in params {
-        println!("{}", par)
-    }
+    // for par in params {
+    //     print!("{}", par)
+    // }
 }
 
 pub fn cat(str: &str) {
