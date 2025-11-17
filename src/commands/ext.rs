@@ -42,7 +42,7 @@ pub fn parse_param(mut par: &str) -> Vec<String> {
     while !par.is_empty() {
         let (a, b) = get_next_param(par);
         retvec.push(a);
-        par = b;
+        par = b.trim();
     }
     retvec
 }
@@ -58,7 +58,7 @@ fn get_next_param(mut par: &str) -> (String, &str) {
     let (a, b) = par.split_at(ind);
     let mut para = String::from(a);
     let mut parb = b.strip_prefix(c).unwrap_or(b);
-    // println!("a: {}, b: {}", a, parb);
+    // println!("a: {}, b: {}", para, parb);
     if parb.starts_with(['\'', '"']) {
         let (c, d) = get_next_param(parb);
         para += c.as_str();
