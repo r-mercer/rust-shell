@@ -56,9 +56,10 @@ pub fn parse_param(mut par: &str) -> Vec<&str> {
     let mut strs: Vec<&str> = Vec::new();
     par = par.trim();
     while !par.is_empty() {
-        let c: char = match par.starts_with("'") {
-            true => '\'',
-            false => ' ',
+        let c: char = match par.get(0..1) {
+            Some("'") => '\'',
+            Some("\"") => '"',
+            _ => ' ',
         };
         par = par.trim().strip_prefix(c).unwrap_or(par);
         let ind = par.find(c).unwrap_or(par.len());
