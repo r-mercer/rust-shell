@@ -16,14 +16,12 @@ fn main() {
         let mut command = String::new();
         io::stdin().read_line(&mut command).unwrap();
 
-        // let com_arr = command.trim().split_once(' ').unwrap_();
         let com_arr = command
             .trim()
             .split_once(' ')
             .unwrap_or_else(|| (command.trim(), ""));
 
         if com_arr.0 == "exit" {
-            // I think we can just break here??
             exit = false;
             continue;
         }
@@ -40,5 +38,3 @@ fn main() {
         }
     }
 }
-
-// fn parse_comd() {}
