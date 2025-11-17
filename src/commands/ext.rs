@@ -71,27 +71,27 @@ pub fn parse_param(mut par: &str) -> Vec<String> {
 }
 
 fn get_next_param(mut par: &str) -> (&str, &str) {
-    println!("get_next_param passed: {}", par);
+    // println!("get_next_param passed: {}", par);
     let c: char = match par.get(0..1) {
         Some("'") => '\'',
         Some("\"") => '"',
         _ => ' ',
     };
     par = par.trim().strip_prefix(c).unwrap_or(par);
-    println!("par post trim: {}", par);
+    // println!("par post trim: {}", par);
     let ind = par.find(c).unwrap_or(par.len());
     let (ret, b) = par.split_at(ind);
-    println!("par b prefix trim: {}", b);
+    // println!("par b prefix trim: {}", b);
     par = b.trim().strip_prefix(c).unwrap_or(b);
-    println!("par post prefix trim: {}", par);
+    // println!("par post prefix trim: {}", par);
     // while !par.starts_with(" ") {
     //     let mut strs: Vec<&str> = vec![ret];
     //     let (a, b) = get_next_param(par);
     //     strs.push(a);
     //     par = b;
     // }
-    println!("get_next_param return par: {}", par);
-    println!("get_next_param return ret: {}", ret);
+    // println!("get_next_param return par: {}", par);
+    // println!("get_next_param return ret: {}", ret);
     (ret, par)
 }
 // fn get_pars(mut pars: )
