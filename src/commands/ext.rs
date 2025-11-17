@@ -42,24 +42,16 @@ pub fn echo(str: &str) {
 
 pub fn cat(str: &str) {
     let mut list = Command::new("cat");
-    // println!("{}", str);
-    // let strs: Vec<&str> = str.split_inclusive(" '").collect();
-    let strs: Vec<String> = parse_param(str);
-    // str.split_whitespace().collect();
-    // // let strs = strs.iter().collect::<Vec<&str>>();
-
-    // let strg = strs.iter().map(|f| f.replace(['"', '\''], ""));
-    // let st = strg.split_whitespace();
-    // list.arg(str).status().expect("file contents");
+    let strs: Vec<String> = parse_param(str.trim());
     list.args(strs).status().expect("file contents");
 }
 
 pub fn parse_param(mut par: &str) -> Vec<String> {
     let mut strs: Vec<String> = Vec::new();
     while !par.is_empty() {
-        let (a, b) = get_next_param(par.trim());
-        par = b.trim();
+        let (a, b) = get_next_param(par);
         let mut ret = String::from(a);
+        par = b;
         while par.starts_with("'") || par.starts_with("\"") {
             let (a, b) = get_next_param(par);
             ret.push_str(a);
@@ -69,29 +61,17 @@ pub fn parse_param(mut par: &str) -> Vec<String> {
     }
     strs
 }
-
 fn get_next_param(mut par: &str) -> (&str, &str) {
-    // println!("get_next_param passed: {}", par);
+    par = par.trim();
     let c: char = match par.get(0..1) {
         Some("'") => '\'',
         Some("\"") => '"',
         _ => ' ',
     };
-    par = par.trim().strip_prefix(c).unwrap_or(par);
-    // println!("par post trim: {}", par);
+    par = par.strip_prefix(c).unwrap_or(par);
     let ind = par.find(c).unwrap_or(par.len());
     let (ret, b) = par.split_at(ind);
-    // println!("par b prefix trim: {}", b);
-    par = b.trim().strip_prefix(c).unwrap_or(b);
-    // println!("par post prefix trim: {}", par);
-    // while !par.starts_with(" ") {
-    //     let mut strs: Vec<&str> = vec![ret];
-    //     let (a, b) = get_next_param(par);
-    //     strs.push(a);
-    //     par = b;
-    // }
-    // println!("get_next_param return par: {}", par);
-    // println!("get_next_param return ret: {}", ret);
+    par = b.strip_prefix(c).unwrap_or(b);
     (ret, par)
 }
 // fn get_pars(mut pars: )
