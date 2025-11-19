@@ -1,3 +1,4 @@
+// use regex::{Match, Regex};
 use std::char;
 use std::env::{home_dir, set_current_dir};
 // use std::error::Error;
@@ -27,6 +28,7 @@ pub fn cd(path: &str) {
 }
 
 pub fn echo(str: &str) {
+    println!("echo string passed: {}", str);
     let params = parse_param(str);
     println!("{}", params.join(" "));
 }
@@ -39,6 +41,9 @@ pub fn cat(str: &str) {
 
 pub fn parse_param(mut par: &str) -> Vec<String> {
     let mut retvec: Vec<String> = Vec::new();
+
+    // let parstr: String = par.escape_unicode().collect();
+    println!("parse param passed: {}", par);
     while !par.is_empty() {
         let (a, b) = get_next_param(par);
         retvec.push(a);
@@ -47,15 +52,31 @@ pub fn parse_param(mut par: &str) -> Vec<String> {
     retvec
 }
 
+// fn replace_escape(mut par: &str) -> String {
+//     let mut retstr = String::new();
+//     let retstr = par.escape_unicode().collect();
+//     // retstr = par.replace("\"", )
+//     retstr
+// }
+
 fn get_next_param(mut par: &str) -> (String, &str) {
     let c: char = match par.trim().get(0..1) {
         Some("'") => '\'',
         Some("\"") => '"',
         _ => ' ',
     };
-
+    // let str = String::from("[^\\]").push_str('"' + c);
+    // let re = Regex::new(format!("[^\\\\]{}", c).as_str()).expect("Invalid regex pattern");
     par = par.strip_prefix(c).unwrap_or(par);
-    let ind = par.find(c).unwrap_or(par.len());
+    let mut ind = par.len();
+
+    if par.contains('\'') || par.contains('\"') {
+        if c == '\'' || c == '"' {
+            par.find("\"").unwrap_or(par.find("\'").unwrap_or(ind));
+        }
+    } else {
+        ind = par.find(c).unwrap_or(par.len());
+    }
     let (a, b) = par.split_at(ind);
     let mut para = check_escape(a, c);
     para = para.replace("\"\"", "").replace("''", "");
