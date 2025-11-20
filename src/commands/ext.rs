@@ -28,7 +28,7 @@ pub fn cd(path: &str) {
 }
 
 pub fn echo(str: &str) {
-    println!("echo string passed: {}", str);
+    // println!("echo string passed: {}", str);
     let params = parse_comm(str);
     println!("{}", params.join(" "));
 }
@@ -42,7 +42,7 @@ pub fn cat(str: &str) {
 pub fn parse_param(mut par: &str) -> Vec<String> {
     let mut retvec: Vec<String> = Vec::new();
 
-    println!("parse param passed: {}", par);
+    // println!("parse param passed: {}", par);
     while !par.is_empty() {
         let (a, b) = get_next_param(par);
         retvec.push(a);
@@ -55,23 +55,34 @@ pub fn parse_comm(inp: &str) -> Vec<String> {
     let mut bar = inp.chars().peekable();
     let mut retvec: Vec<String> = Vec::new();
     let mut fin = false;
-    println!("in lines: {}", inp);
+    // println!("in lines: {}", inp);
 
+    // 'stringloop: while !fin {
     while !fin {
         let mut retstr = String::new();
         let ca: char = match bar.peek() {
-            Some('\'') => '\'',
-            Some('"') => '"',
+            Some('\'') => {
+                bar.next();
+                '\''
+            }
+            Some('"') => {
+                bar.next();
+                '"'
+            }
             _ => ' ',
         };
-        println!("ca val: {}", ca);
-        while bar.peek().is_some() {
+        // println!("ca: <{}>", ca);
+        'wordloop: while bar.peek().is_some() {
             let a: char = bar.next().unwrap_or(' ');
-            if a == '\'' {
-                retstr.push(bar.next().unwrap());
+            // println!("a: <{}>", a);
+            if a == '\\' {
+                if bar.peek().is_some() {
+                    retstr.push(bar.next().unwrap());
+                } else {
+                    break 'wordloop;
+                }
             } else if a == ca {
-                println!("a: {}", a);
-                break;
+                break 'wordloop;
             } else {
                 retstr.push(a);
             }
