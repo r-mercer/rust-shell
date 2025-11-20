@@ -29,7 +29,7 @@ pub fn cd(path: &str) {
 
 pub fn echo(str: &str) {
     println!("echo string passed: {}", str);
-    let params = parse_param(str);
+    let params = parse_comm(str);
     println!("{}", params.join(" "));
 }
 
@@ -42,7 +42,6 @@ pub fn cat(str: &str) {
 pub fn parse_param(mut par: &str) -> Vec<String> {
     let mut retvec: Vec<String> = Vec::new();
 
-    // let parstr: String = par.escape_unicode().collect();
     println!("parse param passed: {}", par);
     while !par.is_empty() {
         let (a, b) = get_next_param(par);
@@ -52,6 +51,36 @@ pub fn parse_param(mut par: &str) -> Vec<String> {
     retvec
 }
 
+pub fn parse_comm(inp: &str) -> Vec<String> {
+    let mut bar = inp.chars().peekable();
+    let mut retvec: Vec<String> = Vec::new();
+    let mut fin = false;
+    println!("in lines: {}", inp);
+
+    while !fin {
+        let mut retstr = String::new();
+        let ca: char = match bar.peek() {
+            Some('\'') => '\'',
+            Some('"') => '"',
+            _ => ' ',
+        };
+        println!("ca val: {}", ca);
+        while bar.peek().is_some() {
+            let a: char = bar.next().unwrap_or(' ');
+            if a == '\'' {
+                retstr.push(bar.next().unwrap());
+            } else if a == ca {
+                println!("a: {}", a);
+                break;
+            } else {
+                retstr.push(a);
+            }
+        }
+        retvec.push(retstr);
+        fin = bar.size_hint().1.unwrap_or(0) == 0;
+    }
+    retvec
+}
 // fn replace_escape(mut par: &str) -> String {
 //     let mut retstr = String::new();
 //     let retstr = par.escape_unicode().collect();
