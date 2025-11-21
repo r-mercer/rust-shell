@@ -35,29 +35,26 @@ pub fn echo(str: &str) {
 
 pub fn cat(str: &str) {
     let mut list = Command::new("cat");
-    let strs: Vec<String> = parse_param(str.trim());
+    let strs: Vec<String> = parse_comm(str.trim());
     list.args(strs).status().expect("file contents");
 }
 
-pub fn parse_param(mut par: &str) -> Vec<String> {
-    let mut retvec: Vec<String> = Vec::new();
-
-    // println!("parse param passed: {}", par);
-    while !par.is_empty() {
-        let (a, b) = get_next_param(par);
-        retvec.push(a);
-        par = b.trim();
-    }
-    retvec
-}
+// pub fn parse_param(mut par: &str) -> Vec<String> {
+//     let mut retvec: Vec<String> = Vec::new();
+//
+//     while !par.is_empty() {
+//         let (a, b) = get_next_param(par);
+//         retvec.push(a);
+//         par = b.trim();
+//     }
+//     retvec
+// }
 
 pub fn parse_comm(inp: &str) -> Vec<String> {
     let mut bar = inp.chars().peekable();
     let mut retvec: Vec<String> = Vec::new();
     let mut fin = false;
-    // println!("in lines: {}", inp);
 
-    // 'stringloop: while !fin {
     while !fin {
         let mut retstr = String::new();
         let ca: char = match bar.peek() {
@@ -71,10 +68,8 @@ pub fn parse_comm(inp: &str) -> Vec<String> {
             }
             _ => ' ',
         };
-        // println!("ca: <{}>", ca);
         'wordloop: while bar.peek().is_some() {
             let a: char = bar.next().unwrap_or(' ');
-            // println!("a: <{}>", a);
             if a == '\\' {
                 if bar.peek().is_some() {
                     retstr.push(bar.next().unwrap());
@@ -82,7 +77,9 @@ pub fn parse_comm(inp: &str) -> Vec<String> {
                     break 'wordloop;
                 }
             } else if a == ca {
-                break 'wordloop;
+                if bar.peek().unwrap_or(&' ').is_whitespace() {
+                    break 'wordloop;
+                }
             } else {
                 retstr.push(a);
             }
