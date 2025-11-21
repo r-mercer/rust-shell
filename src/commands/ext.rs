@@ -55,9 +55,9 @@ pub fn parse_comm(inp: &str) -> Vec<String> {
     let mut retvec: Vec<String> = Vec::new();
     let mut fin = false;
 
-    while !fin {
+    'stringloop: while !fin {
         let mut retstr = String::new();
-        let ca: char = match bar.peek() {
+        let ca: char = match bar.peek().filter(|x| !x.is_whitespace()) {
             Some('\'') => {
                 bar.next();
                 '\''
@@ -65,6 +65,10 @@ pub fn parse_comm(inp: &str) -> Vec<String> {
             Some('"') => {
                 bar.next();
                 '"'
+            }
+            Some(' ') => {
+                break 'stringloop;
+                // '"'
             }
             _ => ' ',
         };
