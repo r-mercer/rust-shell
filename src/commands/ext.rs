@@ -85,12 +85,12 @@ pub fn parse_comm(inp: &str) -> Vec<String> {
         };
         'wordloop: while bar.peek().is_some() {
             // let a: char = bar.next().unwrap_or(' ');
+            println!("withinquotes: {}", withinquotes);
             let a: char = bar.next().unwrap();
-            // println!("ca: {} | a: {}", ca, a);
+            println!("ca: {} | a: {}", ca, a);
             // if a == '\\' && ca != '\'' {
-            if a == '\'' {
+            if a == '\'' && !retstr.ends_with('\\') {
                 withinquotes = !withinquotes;
-                // println!("withinquotes: {}", withinquotes);
             }
             if a == '\\' && !withinquotes {
                 // Not sure this is right but tests is tests
@@ -101,6 +101,10 @@ pub fn parse_comm(inp: &str) -> Vec<String> {
                     bar.next();
                 } else if bar.peek().is_some_and(|x| x != &'\\') {
                     retstr.push(bar.next().unwrap());
+                    // println!("skip push to retstr: {}", a);
+                    // break 'wordloop;
+                    // } else if bar.peek().is_some_and(|x| x != &'\'') {
+                    //     withinquotes = false;
                     // println!("skip push to retstr: {}", a);
                     // break 'wordloop;
                 } else {
