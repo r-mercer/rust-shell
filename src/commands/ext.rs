@@ -28,7 +28,6 @@ pub fn cd(path: &str) {
 }
 
 pub fn echo(str: &str) {
-    // println!("echo string passed: {}", str);
     let params = parse_comm(str);
     println!("{}", params.join(" "));
 }
@@ -38,17 +37,6 @@ pub fn cat(str: &str) {
     let strs: Vec<String> = parse_comm(str.trim());
     list.args(strs).status().expect("file contents");
 }
-
-// pub fn parse_param(mut par: &str) -> Vec<String> {
-//     let mut retvec: Vec<String> = Vec::new();
-//
-//     while !par.is_empty() {
-//         let (a, b) = get_next_param(par);
-//         retvec.push(a);
-//         par = b.trim();
-//     }
-//     retvec
-// }
 
 pub fn parse_comm(inp: &str) -> Vec<String> {
     let mut bar = inp.chars().peekable();
@@ -66,7 +54,6 @@ pub fn parse_comm(inp: &str) -> Vec<String> {
         let mut withinquotes = false;
         // println!("withinquotes: {}", withinquotes);
         let ca: char = match bar.peek() {
-            // let ca: char = match bar.peek().filter(|x| !x.is_whitespace()) {
             Some('\'') => {
                 bar.next();
                 withinquotes = true;
@@ -77,45 +64,39 @@ pub fn parse_comm(inp: &str) -> Vec<String> {
                 bar.next();
                 '"'
             }
-            // Some(' ') => {
-            //     break 'stringloop;
-            //     // '"'
-            // }
             _ => ' ',
         };
         'wordloop: while bar.peek().is_some() {
-            // let a: char = bar.next().unwrap_or(' ');
             // println!("withinquotes: {}", withinquotes);
             let a: char = bar.next().unwrap();
             // println!("ca: {} | a: {}", ca, a);
-            // if a == '\\' && ca != '\'' {
             if a == '\'' && !retstr.ends_with('\\') {
                 withinquotes = !withinquotes;
             }
             if a == '\\' && !withinquotes {
+                // println!("Optout line {}", 77);
                 // Not sure this is right but tests is tests
-                // if bar.peek().is_some_and(|x| x != &'\\') {
                 if bar.peek().is_some_and(|x| x == &a) {
                     // println!("push to retstr: {}", a);
+                    // println!("Optout line {}", 81);
                     retstr.push(a);
                     bar.next();
                 } else if bar.peek().is_some_and(|x| x != &'\\') {
                     retstr.push(bar.next().unwrap());
+                    // println!("Optout line {}", 86);
                     // println!("skip push to retstr: {}", a);
-                    // break 'wordloop;
-                    // } else if bar.peek().is_some_and(|x| x != &'\'') {
-                    //     withinquotes = false;
-                    // println!("skip push to retstr: {}", a);
-                    // break 'wordloop;
                 } else {
+                    // println!("Optout line {}", 89);
                     break 'wordloop;
                 }
             } else if a == ca && !withinquotes {
+                // println!("Optout line {}", 93);
                 if bar.peek().unwrap_or(&' ').is_whitespace() {
                     // println!("break loop");
                     break 'wordloop;
                 }
             } else {
+                // println!("Optout line {}", 99);
                 retstr.push(a);
             }
         }
