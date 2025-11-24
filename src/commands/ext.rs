@@ -85,9 +85,9 @@ pub fn parse_comm(inp: &str) -> Vec<String> {
         };
         'wordloop: while bar.peek().is_some() {
             // let a: char = bar.next().unwrap_or(' ');
-            println!("withinquotes: {}", withinquotes);
+            // println!("withinquotes: {}", withinquotes);
             let a: char = bar.next().unwrap();
-            println!("ca: {} | a: {}", ca, a);
+            // println!("ca: {} | a: {}", ca, a);
             // if a == '\\' && ca != '\'' {
             if a == '\'' && !retstr.ends_with('\\') {
                 withinquotes = !withinquotes;
