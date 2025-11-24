@@ -55,33 +55,60 @@ pub fn parse_comm(inp: &str) -> Vec<String> {
     let mut retvec: Vec<String> = Vec::new();
     let mut fin = false;
 
-    'stringloop: while !fin {
+    // let ca: char = match bar.peek().filter(|x: char| !x.is_whitespace()) {
+    while !fin {
         let mut retstr = String::new();
-        let ca: char = match bar.peek().filter(|x| !x.is_whitespace()) {
+
+        while bar.peek().is_some_and(|x| x == &' ') {
+            bar.next();
+        }
+
+        let mut withinquotes = false;
+        // println!("withinquotes: {}", withinquotes);
+        let ca: char = match bar.peek() {
+            // let ca: char = match bar.peek().filter(|x| !x.is_whitespace()) {
             Some('\'') => {
                 bar.next();
+                withinquotes = true;
+                // println!("withinquotes: {}", withinquotes);
                 '\''
             }
             Some('"') => {
                 bar.next();
                 '"'
             }
-            Some(' ') => {
-                break 'stringloop;
-                // '"'
-            }
+            // Some(' ') => {
+            //     break 'stringloop;
+            //     // '"'
+            // }
             _ => ' ',
         };
         'wordloop: while bar.peek().is_some() {
-            let a: char = bar.next().unwrap_or(' ');
-            if a == '\\' {
-                if bar.peek().is_some() {
+            // let a: char = bar.next().unwrap_or(' ');
+            let a: char = bar.next().unwrap();
+            println!("ca: {} | a: {}", ca, a);
+            // if a == '\\' && ca != '\'' {
+            if a == '\'' {
+                withinquotes = !withinquotes;
+                // println!("withinquotes: {}", withinquotes);
+            }
+            if a == '\\' && !withinquotes {
+                // Not sure this is right but tests is tests
+                // if bar.peek().is_some_and(|x| x != &'\\') {
+                if bar.peek().is_some_and(|x| x == &a) {
+                    // println!("push to retstr: {}", a);
+                    retstr.push(a);
+                    bar.next();
+                } else if bar.peek().is_some_and(|x| x != &'\\') {
                     retstr.push(bar.next().unwrap());
+                    // println!("skip push to retstr: {}", a);
+                    // break 'wordloop;
                 } else {
                     break 'wordloop;
                 }
-            } else if a == ca {
+            } else if a == ca && !withinquotes {
                 if bar.peek().unwrap_or(&' ').is_whitespace() {
+                    // println!("break loop");
                     break 'wordloop;
                 }
             } else {
@@ -100,45 +127,45 @@ pub fn parse_comm(inp: &str) -> Vec<String> {
 //     retstr
 // }
 
-fn get_next_param(mut par: &str) -> (String, &str) {
-    let c: char = match par.trim().get(0..1) {
-        Some("'") => '\'',
-        Some("\"") => '"',
-        _ => ' ',
-    };
-    // let str = String::from("[^\\]").push_str('"' + c);
-    // let re = Regex::new(format!("[^\\\\]{}", c).as_str()).expect("Invalid regex pattern");
-    par = par.strip_prefix(c).unwrap_or(par);
-    let mut ind = par.len();
-
-    if par.contains('\'') || par.contains('\"') {
-        if c == '\'' || c == '"' {
-            par.find("\"").unwrap_or(par.find("\'").unwrap_or(ind));
-        }
-    } else {
-        ind = par.find(c).unwrap_or(par.len());
-    }
-    let (a, b) = par.split_at(ind);
-    let mut para = check_escape(a, c);
-    para = para.replace("\"\"", "").replace("''", "");
-    let mut parb = b.strip_prefix(c).unwrap_or(b);
-
-    if parb.starts_with(['\'', '"']) {
-        let (d, e) = get_next_param(parb);
-        para += d.as_str();
-        parb = e;
-    }
-    (para, parb)
-}
-
-fn check_escape(a: &str, c: char) -> String {
-    let para = String::from(a);
-    match c {
-        '"' => para,
-        '\'' => para,
-        _ => para.replace('\\', ""),
-    }
-}
+// fn get_next_param(mut par: &str) -> (String, &str) {
+//     let c: char = match par.trim().get(0..1) {
+//         Some("'") => '\'',
+//         Some("\"") => '"',
+//         _ => ' ',
+//     };
+//     // let str = String::from("[^\\]").push_str('"' + c);
+//     // let re = Regex::new(format!("[^\\\\]{}", c).as_str()).expect("Invalid regex pattern");
+//     par = par.strip_prefix(c).unwrap_or(par);
+//     let mut ind = par.len();
+//
+//     if par.contains('\'') || par.contains('\"') {
+//         if c == '\'' || c == '"' {
+//             par.find("\"").unwrap_or(par.find("\'").unwrap_or(ind));
+//         }
+//     } else {
+//         ind = par.find(c).unwrap_or(par.len());
+//     }
+//     let (a, b) = par.split_at(ind);
+//     let mut para = check_escape(a, c);
+//     para = para.replace("\"\"", "").replace("''", "");
+//     let mut parb = b.strip_prefix(c).unwrap_or(b);
+//
+//     if parb.starts_with(['\'', '"']) {
+//         let (d, e) = get_next_param(parb);
+//         para += d.as_str();
+//         parb = e;
+//     }
+//     (para, parb)
+// }
+//
+// fn check_escape(a: &str, c: char) -> String {
+//     let para = String::from(a);
+//     match c {
+//         '"' => para,
+//         '\'' => para,
+//         _ => para.replace('\\', ""),
+//     }
+// }
 //     let c: char = match par.get(0..1) {
 //         Some("'") => '\'',
 //         Some("\"") => '"',
