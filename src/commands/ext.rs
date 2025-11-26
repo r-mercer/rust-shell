@@ -105,14 +105,14 @@ pub fn parse_comm(inp: &str) -> Vec<String> {
             } else if a == ca {
                 if withinquotes {
                     retstr.push(a);
-                    // println!("line:{}", 102);
+                    // println!("line:{}", 108);
+                } else if bar.peek().is_some_and(|x| !x.is_whitespace()) && ca != ' ' {
+                    // println!("add wordline:{}", 114);
+                    addword = true;
+                    break 'wordloop;
                 } else if bar.peek().is_some_and(|x| x == &'/' || x == &'"') && ca != ' ' {
                     bar.next();
-                    // println!("line:{}", 105);
-                    break 'wordloop;
-                } else if bar.peek().is_some_and(|x| !x.is_whitespace()) && ca != ' ' {
-                    // println!("line:{}", 109);
-                    addword = true;
+                    // println!("line:{}", 111);
                     break 'wordloop;
                     // retstr.push(bar.next().unwrap());
                 } else {
@@ -158,10 +158,10 @@ mod tests {
         //     echo_test(r#"hello\"insidequotes"test\"#),
         //     r#"hello"insidequotestest""#
         // );
-        // assert_eq!(
-        //     echo_test("script'hello'\\'example"),
-        //     "script'hello'\'example"
-        // );
+        assert_eq!(
+            echo_test(r#""script  world"  "test""example""#),
+            r#"script  world testexample"#
+        );
         assert_eq!(echo_test(r#"/tmp/owl/'f \58\'"#), r#"/tmp/owl/'f \58\'"#);
         assert_eq!(echo_test(r#"/tmp/bee/'f \96\'"#), r#"/tmp/bee/'f \96\'"#);
         assert_eq!(echo_test(r#"\'\"shell hello\"\'"#), r#"'"shell hello"'"#);
