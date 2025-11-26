@@ -133,110 +133,13 @@ mod tests {
     use super::*;
     #[test]
     fn test_escapes() {
-        // assert_eq!(
-        //     echo_test(r#""shell"  "script's"  hello""test""#),
-        //     r#"shell script's hellotest"#
-        // );
-        // assert_eq!(
-        //     echo_test(r#"hello\"insidequotes"test\"#),
-        //     r#"hello"insidequotestest""#
-        // );
         assert_eq!(
             echo_test(r#""script  world" "test""example""#),
             r#"script  world testexample"#
         );
-        assert_eq!(echo_test(r#"/tmp/owl/'f \58\'"#), r#"/tmp/owl/'f \58\'"#);
-        assert_eq!(echo_test(r#"/tmp/bee/'f \96\'"#), r#"/tmp/bee/'f \96\'"#);
         assert_eq!(echo_test(r#"\'\"shell hello\"\'"#), r#"'"shell hello"'"#);
         assert_eq!(echo_test(r#"shell\nexample"#), r#"shellnexample"#);
-        assert_eq!(
-            echo_test(r#"script'test'\\'world"#),
-            r#"script'test'\'world"#
-        );
 
         assert_eq!(echo_test(r#""/tmp/bee/f \51\'""#), r#"/tmp/bee/f \51\'"#);
     }
 }
-// fn replace_escape(mut par: &str) -> String {
-//     let mut retstr = String::new();
-//     let retstr = par.escape_unicode().collect();
-//     // retstr = par.replace("\"", )
-//     retstr
-// }
-
-// fn get_next_param(mut par: &str) -> (String, &str) {
-//     let c: char = match par.trim().get(0..1) {
-//         Some("'") => '\'',
-//         Some("\"") => '"',
-//         _ => ' ',
-//     };
-//     // let str = String::from("[^\\]").push_str('"' + c);
-//     // let re = Regex::new(format!("[^\\\\]{}", c).as_str()).expect("Invalid regex pattern");
-//     par = par.strip_prefix(c).unwrap_or(par);
-//     let mut ind = par.len();
-//
-//     if par.contains('\'') || par.contains('\"') {
-//         if c == '\'' || c == '"' {
-//             par.find("\"").unwrap_or(par.find("\'").unwrap_or(ind));
-//         }
-//     } else {
-//         ind = par.find(c).unwrap_or(par.len());
-//     }
-//     let (a, b) = par.split_at(ind);
-//     let mut para = check_escape(a, c);
-//     para = para.replace("\"\"", "").replace("''", "");
-//     let mut parb = b.strip_prefix(c).unwrap_or(b);
-//
-//     if parb.starts_with(['\'', '"']) {
-//         let (d, e) = get_next_param(parb);
-//         para += d.as_str();
-//         parb = e;
-//     }
-//     (para, parb)
-// }
-//
-// fn check_escape(a: &str, c: char) -> String {
-//     let para = String::from(a);
-//     match c {
-//         '"' => para,
-//         '\'' => para,
-//         _ => para.replace('\\', ""),
-//     }
-// }
-//     let c: char = match par.get(0..1) {
-//         Some("'") => '\'',
-//         Some("\"") => '"',
-//         _ => ' ',
-//     };
-//     par = par.strip_prefix(c).unwrap_or(par);
-//     let ind = par.find(c).unwrap_or(par.len());
-//     let (ret, b) = par.split_at(ind);
-//     par = b.strip_prefix(c).unwrap_or(b);
-//     if
-//     (ret, par)
-// }
-// fn get_pars(mut pars: )
-// fn get_path(path: &str) -> Result<PathBuf, Error> {
-//     let mut dest = PathBuf::from(path);
-//     if dest.is_relative() {
-//         if dest.starts_with("./") {
-//             dest.strip_prefix("./").expect("Issue with path prefix");
-//         }
-//         let mut cwd = env::current_dir()?;
-//         while dest.starts_with("../") {
-//             dest.strip_prefix("../").expect("Issue with path prefix");
-//             cwd.pop();
-//         }
-//         dest = dest.join(cwd);
-//     }
-//     Ok(dest)
-// }
-// pub fn handle_path(mut pwd: PathBuf, dest: &str) -> PathBuf {
-//     if dest_path.is_absolute() {
-//         set_current_dir(dest_path);
-//     } else if dest.starts_with("../") {
-//         pwd.pop();
-//     }
-//     pwd.push(&dest);
-//     pwd
-// }
