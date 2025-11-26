@@ -49,9 +49,11 @@ pub fn parse_comm(inp: &str) -> Vec<String> {
 
         if addword {
             retstr = retvec.pop().unwrap_or_default();
+            addword = false;
         }
 
-        while bar.peek().is_some_and(|x| x == &' ') {
+        while bar.peek().is_some_and(|x| x.is_whitespace()) {
+            // println!("skip whitespace");
             bar.next();
         }
 
@@ -69,27 +71,27 @@ pub fn parse_comm(inp: &str) -> Vec<String> {
             }
             _ => ' ',
         };
+
         'wordloop: while bar.peek().is_some() {
             // println!("withinquotes: {}", withinquotes);
             let a: char = bar.next().unwrap();
-            // println!("ca: {} | a: {}", ca, a);
-            // if a == '\'' && bar.peek().is_some_and(|x| !ESCAPES.contains(&x)) {
-            // if a == '\'' && !retstr.ends_with('\\') {
             if a == '\'' && !withindoublequotes {
                 withinquotes = !withinquotes;
             }
             if a == '"' && !withinquotes {
                 withindoublequotes = !withindoublequotes;
             }
-            // println!("withinquotes: {}", withinquotes);
-            // println!("withindoublequotes: {}", withindoublequotes);
+            // println!(
+            //     "ca:{} | a:{} | wq: {} | wdq: {} |aw:{}",
+            //     ca, a, withinquotes, withindoublequotes, addword
+            // );
             if a == '\\' {
                 if withinquotes {
                     retstr.push(a);
                 } else if withindoublequotes {
                     if bar.peek().is_some_and(|x| ESCAPES.contains(x)) {
                         retstr.push(bar.next().unwrap());
-                    // println!("esc at 81,{}", a);
+                        // println!("esc at 81,{}", a);
                     } else {
                         retstr.push(a);
                     }
@@ -100,8 +102,6 @@ pub fn parse_comm(inp: &str) -> Vec<String> {
                     retstr.push(a);
                     // println!("esc at 89,{}", a);
                 }
-            } else if a == ca && bar.peek().is_none() {
-                break 'wordloop;
             } else if a == ca {
                 if withinquotes {
                     retstr.push(a);
@@ -110,7 +110,7 @@ pub fn parse_comm(inp: &str) -> Vec<String> {
                     // println!("add wordline:{}", 114);
                     addword = true;
                     break 'wordloop;
-                } else if bar.peek().is_some_and(|x| x == &'/' || x == &'"') && ca != ' ' {
+                } else if bar.peek().is_some_and(|x| x == &'/' || x == &'"') {
                     bar.next();
                     // println!("line:{}", 111);
                     break 'wordloop;
@@ -119,6 +119,9 @@ pub fn parse_comm(inp: &str) -> Vec<String> {
                     // println!("line:{}", 111);
                     break 'wordloop;
                 }
+            } else if ca == ' ' && (a == '"' || a == '\'') {
+                bar.next();
+            // } else if ca == ' ' && a == '\'' &&  {
             } else {
                 retstr.push(a);
             }
@@ -153,13 +156,16 @@ mod tests {
     use super::*;
     #[test]
     fn test_escapes() {
-        // assert_eq!(echo_test(r#"hello'shell'\\'test"#), r#"hello'shell'\'test"#);
+        // assert_eq!(
+        //     echo_test(r#""shell"  "script's"  hello""test""#),
+        //     r#"shell script's hellotest"#
+        // );
         // assert_eq!(
         //     echo_test(r#"hello\"insidequotes"test\"#),
         //     r#"hello"insidequotestest""#
         // );
         assert_eq!(
-            echo_test(r#""script  world"  "test""example""#),
+            echo_test(r#""script  world" "test""example""#),
             r#"script  world testexample"#
         );
         assert_eq!(echo_test(r#"/tmp/owl/'f \58\'"#), r#"/tmp/owl/'f \58\'"#);
