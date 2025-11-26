@@ -1,8 +1,5 @@
-// use regex::{Match, Regex};
 use std::char;
 use std::env::{home_dir, set_current_dir};
-// use std::error::Error;
-// use std::io::Error;
 use std::path::PathBuf;
 use std::process::Command;
 
@@ -42,17 +39,22 @@ pub fn parse_comm(inp: &str) -> Vec<String> {
     let mut bar = inp.chars().peekable();
     let mut retvec: Vec<String> = Vec::new();
     let mut fin = false;
+    let mut addword = false;
 
     // let ca: char = match bar.peek().filter(|x: char| !x.is_whitespace()) {
     while !fin {
         let mut retstr = String::new();
+        let mut withinquotes = false;
+        let mut withindoublequotes = false;
+
+        if addword {
+            retstr = retvec.pop().unwrap_or_default();
+        }
 
         while bar.peek().is_some_and(|x| x == &' ') {
             bar.next();
         }
 
-        let mut withinquotes = false;
-        // println!("withinquotes: {}", withinquotes);
         let ca: char = match bar.peek() {
             Some('\'') => {
                 bar.next();
@@ -62,6 +64,7 @@ pub fn parse_comm(inp: &str) -> Vec<String> {
             }
             Some('"') => {
                 bar.next();
+                withindoublequotes = true;
                 '"'
             }
             _ => ' ',
@@ -70,40 +73,106 @@ pub fn parse_comm(inp: &str) -> Vec<String> {
             // println!("withinquotes: {}", withinquotes);
             let a: char = bar.next().unwrap();
             // println!("ca: {} | a: {}", ca, a);
-            if a == '\'' && !retstr.ends_with('\\') {
+            // if a == '\'' && bar.peek().is_some_and(|x| !ESCAPES.contains(&x)) {
+            // if a == '\'' && !retstr.ends_with('\\') {
+            if a == '\'' && !withindoublequotes {
                 withinquotes = !withinquotes;
             }
-            if a == '\\' && !withinquotes {
-                // println!("Optout line {}", 77);
-                // Not sure this is right but tests is tests
-                if bar.peek().is_some_and(|x| x == &a) {
-                    // println!("push to retstr: {}", a);
-                    // println!("Optout line {}", 81);
+            if a == '"' && !withinquotes {
+                withindoublequotes = !withindoublequotes;
+            }
+            // println!("withinquotes: {}", withinquotes);
+            // println!("withindoublequotes: {}", withindoublequotes);
+            if a == '\\' {
+                if withinquotes {
                     retstr.push(a);
-                    bar.next();
-                } else if bar.peek().is_some_and(|x| x != &'\\') {
+                } else if withindoublequotes {
+                    if bar.peek().is_some_and(|x| ESCAPES.contains(x)) {
+                        retstr.push(bar.next().unwrap());
+                    // println!("esc at 81,{}", a);
+                    } else {
+                        retstr.push(a);
+                    }
+                } else if bar.peek().is_some() {
                     retstr.push(bar.next().unwrap());
-                    // println!("Optout line {}", 86);
-                    // println!("skip push to retstr: {}", a);
                 } else {
-                    // println!("Optout line {}", 89);
-                    break 'wordloop;
+                    // break 'wordloop;
+                    retstr.push(a);
+                    // println!("esc at 89,{}", a);
                 }
-            } else if a == ca && !withinquotes {
-                // println!("Optout line {}", 93);
-                if bar.peek().unwrap_or(&' ').is_whitespace() {
-                    // println!("break loop");
+            } else if a == ca && bar.peek().is_none() {
+                break 'wordloop;
+            } else if a == ca {
+                if withinquotes {
+                    retstr.push(a);
+                    // println!("line:{}", 102);
+                } else if bar.peek().is_some_and(|x| x == &'/' || x == &'"') && ca != ' ' {
+                    bar.next();
+                    // println!("line:{}", 105);
+                    break 'wordloop;
+                } else if bar.peek().is_some_and(|x| !x.is_whitespace()) && ca != ' ' {
+                    // println!("line:{}", 109);
+                    addword = true;
+                    break 'wordloop;
+                    // retstr.push(bar.next().unwrap());
+                } else {
+                    // println!("line:{}", 111);
                     break 'wordloop;
                 }
             } else {
-                // println!("Optout line {}", 99);
                 retstr.push(a);
             }
         }
+        // if addword {
+        //     push_last(retvec.pop().unwrap_or_default(), retstr);
+        // } else {
+        //     retvec.push(retstr);
+        // }
         retvec.push(retstr);
         fin = bar.size_hint().1.unwrap_or(0) == 0;
     }
     retvec
+}
+
+// fn push_last(mut pop: String, push: String) -> String {
+//     pop += push.as_str();
+//     pop
+// }
+
+static ESCAPES: [char; 4] = ['\\', '\"', '`', ' '];
+
+#[allow(dead_code)]
+pub fn echo_test(str: &str) -> String {
+    let params = parse_comm(str);
+    params.join(" ")
+    // println!("{}", params.join(" "));
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_escapes() {
+        // assert_eq!(echo_test(r#"hello'shell'\\'test"#), r#"hello'shell'\'test"#);
+        // assert_eq!(
+        //     echo_test(r#"hello\"insidequotes"test\"#),
+        //     r#"hello"insidequotestest""#
+        // );
+        // assert_eq!(
+        //     echo_test("script'hello'\\'example"),
+        //     "script'hello'\'example"
+        // );
+        assert_eq!(echo_test(r#"/tmp/owl/'f \58\'"#), r#"/tmp/owl/'f \58\'"#);
+        assert_eq!(echo_test(r#"/tmp/bee/'f \96\'"#), r#"/tmp/bee/'f \96\'"#);
+        assert_eq!(echo_test(r#"\'\"shell hello\"\'"#), r#"'"shell hello"'"#);
+        assert_eq!(echo_test(r#"shell\nexample"#), r#"shellnexample"#);
+        assert_eq!(
+            echo_test(r#"script'test'\\'world"#),
+            r#"script'test'\'world"#
+        );
+
+        assert_eq!(echo_test(r#""/tmp/bee/f \51\'""#), r#"/tmp/bee/f \51\'"#);
+    }
 }
 // fn replace_escape(mut par: &str) -> String {
 //     let mut retstr = String::new();
