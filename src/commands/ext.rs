@@ -41,7 +41,6 @@ pub fn parse_comm(inp: &str) -> Vec<String> {
     let mut fin = false;
     let mut addword = false;
 
-    // let ca: char = match bar.peek().filter(|x: char| !x.is_whitespace()) {
     while !fin {
         let mut retstr = String::new();
         let mut withinquotes = false;
@@ -53,7 +52,6 @@ pub fn parse_comm(inp: &str) -> Vec<String> {
         }
 
         while bar.peek().is_some_and(|x| x.is_whitespace()) {
-            // println!("skip whitespace");
             bar.next();
         }
 
@@ -61,7 +59,6 @@ pub fn parse_comm(inp: &str) -> Vec<String> {
             Some('\'') => {
                 bar.next();
                 withinquotes = true;
-                // println!("withinquotes: {}", withinquotes);
                 '\''
             }
             Some('"') => {
@@ -73,7 +70,6 @@ pub fn parse_comm(inp: &str) -> Vec<String> {
         };
 
         'wordloop: while bar.peek().is_some() {
-            // println!("withinquotes: {}", withinquotes);
             let a: char = bar.next().unwrap();
             if a == '\'' && !withindoublequotes {
                 withinquotes = !withinquotes;
@@ -91,56 +87,37 @@ pub fn parse_comm(inp: &str) -> Vec<String> {
                 } else if withindoublequotes {
                     if bar.peek().is_some_and(|x| ESCAPES.contains(x)) {
                         retstr.push(bar.next().unwrap());
-                        // println!("esc at 81,{}", a);
                     } else {
                         retstr.push(a);
                     }
                 } else if bar.peek().is_some() {
                     retstr.push(bar.next().unwrap());
                 } else {
-                    // break 'wordloop;
                     retstr.push(a);
-                    // println!("esc at 89,{}", a);
                 }
             } else if a == ca {
                 if withinquotes {
                     retstr.push(a);
-                    // println!("line:{}", 108);
                 } else if bar.peek().is_some_and(|x| !x.is_whitespace()) && ca != ' ' {
-                    // println!("add wordline:{}", 114);
                     addword = true;
                     break 'wordloop;
                 } else if bar.peek().is_some_and(|x| x == &'/' || x == &'"') {
                     bar.next();
-                    // println!("line:{}", 111);
                     break 'wordloop;
-                    // retstr.push(bar.next().unwrap());
                 } else {
-                    // println!("line:{}", 111);
                     break 'wordloop;
                 }
             } else if ca == ' ' && (a == '"' || a == '\'') {
                 bar.next();
-            // } else if ca == ' ' && a == '\'' &&  {
             } else {
                 retstr.push(a);
             }
         }
-        // if addword {
-        //     push_last(retvec.pop().unwrap_or_default(), retstr);
-        // } else {
-        //     retvec.push(retstr);
-        // }
         retvec.push(retstr);
         fin = bar.size_hint().1.unwrap_or(0) == 0;
     }
     retvec
 }
-
-// fn push_last(mut pop: String, push: String) -> String {
-//     pop += push.as_str();
-//     pop
-// }
 
 static ESCAPES: [char; 4] = ['\\', '\"', '`', ' '];
 
