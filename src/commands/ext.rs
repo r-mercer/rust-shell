@@ -1,38 +1,44 @@
 use std::char;
 use std::env::{home_dir, set_current_dir};
+use std::io::Error;
 use std::path::PathBuf;
 use std::process::Command;
 
-pub fn cd(path: &str) {
+pub fn cd(path: &str) -> Result<(), Error> {
     let mut dest = PathBuf::from(path);
     if dest.starts_with("~") {
         dest.strip_prefix("~").expect("cannot update path");
         dest = home_dir().expect("no home dir");
         set_current_dir(&dest).expect("No Home Dir");
     }
-    let res = set_current_dir(dest);
-    match res {
-        Ok(()) => (),
-        Err(e) => {
-            let mut var = e.to_string();
-            println!(
-                "cd: {}: {}",
-                path,
-                var.get_mut(0..25).expect("err") // this just returns no such file....
-            );
-        }
-    }
+
+    set_current_dir(dest)
+
+    // let res = set_current_dir(dest);
+    // match res {
+    //     Ok(()) => (),
+    //     Err(e) => {
+    //         let mut var = e.to_string();
+    //         println!(
+    //             "cd: {}: {}",
+    //             path,
+    //             var.get_mut(0..25).expect("err") // this just returns no such file....
+    //         );
+    //     }
+    // }
 }
 
-pub fn echo(str: &str) {
+pub fn echo(str: &str) -> Result<String, Error> {
     let params = parse_comm(str);
-    println!("{}", params.join(" "));
+    // println!("{}", params.join(" "));
+    Ok(params.join(" "))
 }
 
-pub fn cat(str: &str) {
+pub fn cat(str: &str) -> Result<String, Error> {
     let mut list = Command::new("cat");
     let strs: Vec<String> = parse_comm(str.trim());
-    list.args(strs).status().expect("file contents");
+    let status = list.args(strs).status();
+    status.to_string()
 }
 
 pub fn parse_comm(inp: &str) -> Vec<String> {
