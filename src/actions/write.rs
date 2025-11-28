@@ -1,5 +1,5 @@
-use std::{fs, path};
+use std::fs;
 
 pub fn to_file(path: String, contents: String) {
-    fs::write(path, contents);
+    let _ = fs::write(path, contents);
 }

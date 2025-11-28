@@ -1,8 +1,8 @@
-use std::char;
+use std::env::{self};
 use std::env::{home_dir, set_current_dir};
 use std::io::Error;
 use std::path::PathBuf;
-use std::process::Command;
+use std::{char, fs};
 
 pub fn cd(path: &str) -> Result<(), Error> {
     let mut dest = PathBuf::from(path);
@@ -28,6 +28,11 @@ pub fn cd(path: &str) -> Result<(), Error> {
     // }
 }
 
+pub fn print_wd() -> Result<String, Error> {
+    let ret = env::current_dir()?;
+    Ok(ret.display().to_string())
+}
+
 pub fn echo(str: &str) -> Result<String, Error> {
     let params = parse_comm(str);
     // println!("{}", params.join(" "));
@@ -35,10 +40,16 @@ pub fn echo(str: &str) -> Result<String, Error> {
 }
 
 pub fn cat(str: &str) -> Result<String, Error> {
-    let mut list = Command::new("cat");
+    // let mut list = Command::new("cat");
     let strs: Vec<String> = parse_comm(str.trim());
-    let status = list.args(strs).status();
-    status.to_string()
+    // let contents = fs::read_to_string(file_path).expect("Should have been able to read the file");
+    let mut ret = String::new();
+    for path in strs {
+        let contents = fs::read_to_string(path).expect("Should have been able to read the file");
+        ret += &contents;
+        ret.push(' ');
+    }
+    Ok(ret)
 }
 
 pub fn parse_comm(inp: &str) -> Vec<String> {

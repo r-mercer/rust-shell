@@ -1,19 +1,12 @@
 use pathsearch::find_executable_in_path;
-use std::env::{self};
+// use std::env::{self};
 use std::io;
 
 use crate::commands::ext;
 
-fn check_silent(com: &str, par: &str) -> Option<String> {
-    match com {
-        "cd" => ext::cd(par)?,
-        _ => (),
-    }
-    Ok(())
-}
-pub fn check_string_output(com: &str, par: &str) -> Result<String, io::Error> {
+pub fn exec_builtin(com: &str, par: &str) -> Result<Option<String>, io::Error> {
     // pub fn check(com: &str, par: &str) -> Result<String> {
-    let mut output = String::new();
+    // let output = String::new();
     match com {
         // "admin" => (),
         // "alias" => (),
@@ -26,7 +19,11 @@ pub fn check_string_output(com: &str, par: &str) -> Result<String, io::Error> {
         // "bc" => (),
         // "bg" => (),
         // "cal" => (),
-        "cat" => ext::cat(par)?,
+        "cd" => {
+            ext::cd(par)?;
+            Ok(None)
+        }
+        "cat" => Ok(Some(ext::cat(par)?)),
         // "cat" => return Ok(ext::cat(par)),
         // "cc" => (),
         // "cflow" => (),
@@ -51,7 +48,7 @@ pub fn check_string_output(com: &str, par: &str) -> Result<String, io::Error> {
         // "diff" => (),
         // "dirname" => (),
         // "du" => (),
-        "echo" => ext::echo(par)?,
+        "echo" => Ok(Some(ext::echo(par)?)),
         // "ed" => (),
         // "env" => (),
         // "ex" => (),
@@ -113,15 +110,7 @@ pub fn check_string_output(com: &str, par: &str) -> Result<String, io::Error> {
         // "printf" => (),
         // "prs" => (),
         // "ps" => (),
-        "pwd" => {
-            let path = env::current_dir();
-            Ok(path.unwrap_or_default().to_str().to_owned())
-            // env::current_dir();
-            // match path {
-            //     Ok(v) => println!("{}", v.display()),
-            //     Err(e) => println!("{e:?}"),
-            // }
-        }
+        "pwd" => Ok(Some(ext::print_wd()?)),
         // "read" => (),
         // "readlink" => (),
         // "realpath" => (),
@@ -154,11 +143,11 @@ pub fn check_string_output(com: &str, par: &str) -> Result<String, io::Error> {
         // "tty" => (),
         "type" => {
             if BUILTINS.contains(&par) {
-                println!("{} is a shell builtin", par)
+                Ok(Some(format!("{} is a shell builtin", par)))
             } else if let Some(path) = find_executable_in_path(&par) {
-                println!("{} is {}", par, path.display());
+                Ok(Some(format!("{} is {}", par, path.display())))
             } else {
-                println!("{}: not found", par)
+                Ok(Some(format!("{}: not found", par)))
             }
         }
         // "ulimit" => (),
@@ -186,14 +175,13 @@ pub fn check_string_output(com: &str, par: &str) -> Result<String, io::Error> {
         // "xgettext" => (),
         // "yacc" => (),
         // "zcat" => (),
-        _ => return Err(),
+        _ => Ok(None),
     }
-    Some()
 }
 
 // should possibly be 156 with exit
 // static BUILTINS: [&str; 155] = [
-static BUILTINS: [&str; 5] = [
+pub static BUILTINS: [&str; 5] = [
     // "admin",
     // "alias",
     // "ar",
