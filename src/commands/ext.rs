@@ -1,10 +1,10 @@
 use std::env::{self};
 use std::env::{home_dir, set_current_dir};
 use std::io::Error;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::{char, fs};
 
-pub fn cd(path: &str) -> Result<(), Error> {
+pub fn cd(path: String) -> Result<(), Error> {
     let mut dest = PathBuf::from(path);
     if dest.starts_with("~") {
         dest.strip_prefix("~").expect("cannot update path");
@@ -28,20 +28,49 @@ pub fn cd(path: &str) -> Result<(), Error> {
     // }
 }
 
+pub fn print_ls(inp: Option<Vec<String>>) -> Result<String, Error> {
+    // let ret = env::current_dir()?;
+    // Ok(ret.display().to_string())
+
+    let path = Path::new(&env::current_dir().unwrap_or_default());
+
+    if inp.is_some() {
+        path = Path::from(strs.first().unwrap());
+    }
+
+    let mut ret = String::new();
+    let path = Path::new(strs.first().unwrap());
+
+    for entry in fs::read_dir(path)? {
+        let entry = entry?;
+        let path = entry.path();
+
+        if path.is_dir() {
+            println!("  [DIR] {}", path.display());
+            ret.push_str(path.to_str().unwrap_or_default());
+        } else if path.is_file() {
+            ret.push_str(path.to_str().unwrap_or_default());
+            println!("  [FILE] {}", path.display());
+        } else {
+            ret.push_str(path.to_str().unwrap_or_default());
+            println!("  [OTHER] {}", path.display());
+        }
+    }
+    Ok(ret)
+}
+
 pub fn print_wd() -> Result<String, Error> {
     let ret = env::current_dir()?;
     Ok(ret.display().to_string())
 }
 
-pub fn echo(str: &str) -> Result<String, Error> {
-    let params = parse_comm(str);
-    // println!("{}", params.join(" "));
-    Ok(params.join(" "))
+pub fn echo(strs: Vec<String>) -> Result<String, Error> {
+    Ok(strs.join(" "))
 }
 
-pub fn cat(str: &str) -> Result<String, Error> {
+pub fn cat(strs: Vec<String>) -> Result<String, Error> {
     // let mut list = Command::new("cat");
-    let strs: Vec<String> = parse_comm(str.trim());
+    // let strs: Vec<String> = parse_comm(str.trim());
     // let contents = fs::read_to_string(file_path).expect("Should have been able to read the file");
     let mut ret = String::new();
     for path in strs {

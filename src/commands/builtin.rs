@@ -4,7 +4,7 @@ use std::io;
 
 use crate::commands::ext;
 
-pub fn exec_builtin(com: &str, par: &str) -> Result<Option<String>, io::Error> {
+pub fn exec_builtin(com: &str, pars: Vec<String>) -> Result<Option<String>, io::Error> {
     // pub fn check(com: &str, par: &str) -> Result<String> {
     // let output = String::new();
     match com {
@@ -20,10 +20,10 @@ pub fn exec_builtin(com: &str, par: &str) -> Result<Option<String>, io::Error> {
         // "bg" => (),
         // "cal" => (),
         "cd" => {
-            ext::cd(par)?;
+            ext::cd(pars.concat())?;
             Ok(None)
         }
-        "cat" => Ok(Some(ext::cat(par)?)),
+        "cat" => Ok(Some(ext::cat(pars)?)),
         // "cat" => return Ok(ext::cat(par)),
         // "cc" => (),
         // "cflow" => (),
@@ -48,7 +48,7 @@ pub fn exec_builtin(com: &str, par: &str) -> Result<Option<String>, io::Error> {
         // "diff" => (),
         // "dirname" => (),
         // "du" => (),
-        "echo" => Ok(Some(ext::echo(par)?)),
+        "echo" => Ok(Some(ext::echo(pars)?)),
         // "ed" => (),
         // "env" => (),
         // "ex" => (),
@@ -84,7 +84,7 @@ pub fn exec_builtin(com: &str, par: &str) -> Result<Option<String>, io::Error> {
         // "logger" => (),
         // "logname" => (),
         // "lp" => (),
-        // "ls" => (),
+        "ls" => Ok(Some(ext::print_ls(pars)?)),
         // "m4" => (),
         // "mailx" => (),
         // "make" => (),
@@ -142,12 +142,12 @@ pub fn exec_builtin(com: &str, par: &str) -> Result<Option<String>, io::Error> {
         // "tsort" => (),
         // "tty" => (),
         "type" => {
-            if BUILTINS.contains(&par) {
-                Ok(Some(format!("{} is a shell builtin", par)))
-            } else if let Some(path) = find_executable_in_path(&par) {
-                Ok(Some(format!("{} is {}", par, path.display())))
+            if BUILTINS.contains(&com) {
+                Ok(Some(format!("{} is a shell builtin", com)))
+            } else if let Some(path) = find_executable_in_path(&com) {
+                Ok(Some(format!("{} is {}", com, path.display())))
             } else {
-                Ok(Some(format!("{}: not found", par)))
+                Ok(Some(format!("{}: not found", com)))
             }
         }
         // "ulimit" => (),
@@ -181,7 +181,7 @@ pub fn exec_builtin(com: &str, par: &str) -> Result<Option<String>, io::Error> {
 
 // should possibly be 156 with exit
 // static BUILTINS: [&str; 155] = [
-pub static BUILTINS: [&str; 5] = [
+pub static BUILTINS: [&str; 6] = [
     // "admin",
     // "alias",
     // "ar",
@@ -254,7 +254,7 @@ pub static BUILTINS: [&str; 5] = [
     // "logger",
     // "logname",
     // "lp",
-    // "ls",
+    "ls",
     // "m4",
     // "mailx",
     // "make",

@@ -12,9 +12,11 @@ mod actions;
 mod commands;
 
 fn main() {
+    // io::stdout().flush().unwrap();
     let mut exit = true;
 
     while exit {
+        io::stdout().flush().unwrap();
         print!("$ ");
         io::stdout().flush().unwrap();
 
@@ -73,7 +75,12 @@ fn parse_input(mut command: String) -> LineCommand {
         arg: Some(com_arr.1.to_string()),
     };
 
-    if com_arr.1.contains("> ") {
+    if com_arr.1.contains("1> ") {
+        let write_arr = com_arr.1.split_once("1> ");
+        com_arr.1 = write_arr.unwrap_or_default().0;
+        com.file_path = Some(write_arr.unwrap_or_default().1.to_string());
+        com.to_file = true;
+    } else if com_arr.1.contains("> ") {
         let write_arr = com_arr.1.split_once("> ");
         com_arr.1 = write_arr.unwrap_or_default().0;
         com.file_path = Some(write_arr.unwrap_or_default().1.to_string());
@@ -86,9 +93,13 @@ fn parse_input(mut command: String) -> LineCommand {
 fn output(command: LineCommand) -> Result<(), io::Error> {
     let mut ret = String::new();
 
+    if command.arg.is_some() && command.args.is_none() {
+        println!("{}", "should we be printing this?")
+    }
+
     match command.type_of {
         CommandType::BuiltIn => {
-            ret = exec_builtin(&command.execute, &command.arg.unwrap_or_default())?
+            ret = exec_builtin(&command.execute, command.args.unwrap_or_default())?
                 .expect("something");
         }
         CommandType::OnUserPATH => {
@@ -106,7 +117,7 @@ fn output(command: LineCommand) -> Result<(), io::Error> {
     }
 
     if command.to_file {
-        actions::write::to_file(command.file_path.unwrap_or_default(), ret);
+        actions::write::to_file(command.file_path.unwrap_or_default(), ret)?;
     } else {
         line_out(ret);
     }
@@ -114,6 +125,7 @@ fn output(command: LineCommand) -> Result<(), io::Error> {
 }
 
 fn line_out(line: String) {
-    let _ = io::stdout().write_all(line.as_bytes());
+    println!("{}", line);
+    // let _ = io::stdout().write_all(line.as_bytes());
     // main();
 }
