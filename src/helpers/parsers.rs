@@ -1,3 +1,5 @@
+static ESCAPES: [char; 4] = ['\\', '\"', '`', ' '];
+
 pub fn parse_comm(inp: &str) -> Vec<String> {
     let mut bar = inp.chars().peekable();
     let mut retvec: Vec<String> = Vec::new();

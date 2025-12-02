@@ -1,13 +1,10 @@
+use crate::commands::{command_type::LineCommand, ext};
 use pathsearch::find_executable_in_path;
-// use std::env::{self};
 use std::io;
 
-use crate::commands::ext;
-
-pub fn exec_builtin(com: &str, pars: Vec<String>) -> Result<Option<String>, io::Error> {
-    // pub fn check(com: &str, par: &str) -> Result<String> {
-    // let output = String::new();
-    match com {
+pub fn exec_builtin(command: LineCommand) -> Result<Option<String>, io::Error> {
+    let matched_command = command.execute.as_str();
+    match matched_command {
         // "admin" => (),
         // "alias" => (),
         // "ar" => (),
@@ -20,10 +17,10 @@ pub fn exec_builtin(com: &str, pars: Vec<String>) -> Result<Option<String>, io::
         // "bg" => (),
         // "cal" => (),
         "cd" => {
-            ext::cd(pars.concat())?;
+            ext::cd(command.args)?;
             Ok(None)
         }
-        "cat" => Ok(Some(ext::cat(pars)?)),
+        "cat" => Ok(Some(ext::cat(command.args)?)),
         // "cat" => return Ok(ext::cat(par)),
         // "cc" => (),
         // "cflow" => (),
@@ -48,7 +45,7 @@ pub fn exec_builtin(com: &str, pars: Vec<String>) -> Result<Option<String>, io::
         // "diff" => (),
         // "dirname" => (),
         // "du" => (),
-        "echo" => Ok(Some(ext::echo(pars)?)),
+        "echo" => Ok(Some(ext::echo(command.args)?)),
         // "ed" => (),
         // "env" => (),
         // "ex" => (),
@@ -84,7 +81,7 @@ pub fn exec_builtin(com: &str, pars: Vec<String>) -> Result<Option<String>, io::
         // "logger" => (),
         // "logname" => (),
         // "lp" => (),
-        "ls" => Ok(Some(ext::print_ls(pars)?)),
+        "ls" => Ok(Some(ext::print_ls(command.args)?)),
         // "m4" => (),
         // "mailx" => (),
         // "make" => (),
@@ -142,12 +139,12 @@ pub fn exec_builtin(com: &str, pars: Vec<String>) -> Result<Option<String>, io::
         // "tsort" => (),
         // "tty" => (),
         "type" => {
-            if BUILTINS.contains(&com) {
-                Ok(Some(format!("{} is a shell builtin", com)))
-            } else if let Some(path) = find_executable_in_path(&com) {
-                Ok(Some(format!("{} is {}", com, path.display())))
+            if BUILTINS.contains(&matched_command) {
+                Ok(Some(format!("{} is a shell builtin", matched_command)))
+            } else if let Some(path) = find_executable_in_path(&matched_command) {
+                Ok(Some(format!("{} is {}", matched_command, path.display())))
             } else {
-                Ok(Some(format!("{}: not found", com)))
+                Ok(Some(format!("{}: not found", matched_command)))
             }
         }
         // "ulimit" => (),

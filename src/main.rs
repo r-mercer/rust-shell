@@ -7,9 +7,10 @@ use std::process::Command;
 // use crate::actions::write;
 use crate::commands::builtin::exec_builtin;
 use crate::commands::command_type::{get_type, CommandType, LineCommand};
-use crate::commands::ext::parse_comm;
+use crate::helpers::parsers::parse_comm;
 mod actions;
 mod commands;
+mod helpers;
 
 fn main() {
     // io::stdout().flush().unwrap();
@@ -65,18 +66,6 @@ fn parse_input(mut command: String) -> LineCommand {
     let mut com_arr = command
         .split_once(char)
         .unwrap_or_else(|| (command.trim(), ""));
-
-    if com_arr.1.contains("1> ") {
-        let write_arr = com_arr.1.split_once("1> ");
-        com_arr.1 = write_arr.unwrap_or_default().0;
-        com.file_path = Some(write_arr.unwrap_or_default().1.to_string());
-        com.to_file = true;
-    } else if com_arr.1.contains("> ") {
-        let write_arr = com_arr.1.split_once("> ");
-        com_arr.1 = write_arr.unwrap_or_default().0;
-        com.file_path = Some(write_arr.unwrap_or_default().1.to_string());
-        com.to_file = true;
-    }
 
     let mut com = LineCommand {
         file_path: None,
