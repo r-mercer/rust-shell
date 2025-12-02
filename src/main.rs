@@ -66,15 +66,6 @@ fn parse_input(mut command: String) -> LineCommand {
         .split_once(char)
         .unwrap_or_else(|| (command.trim(), ""));
 
-    let mut com = LineCommand {
-        file_path: None,
-        to_file: false,
-        type_of: get_type(&command),
-        execute: com_arr.0.to_string(),
-        args: None,
-        arg: Some(com_arr.1.to_string()),
-    };
-
     if com_arr.1.contains("1> ") {
         let write_arr = com_arr.1.split_once("1> ");
         com_arr.1 = write_arr.unwrap_or_default().0;
@@ -86,6 +77,16 @@ fn parse_input(mut command: String) -> LineCommand {
         com.file_path = Some(write_arr.unwrap_or_default().1.to_string());
         com.to_file = true;
     }
+
+    let mut com = LineCommand {
+        file_path: None,
+        to_file: false,
+        type_of: get_type(&command),
+        execute: com_arr.0.to_string(),
+        args: None,
+        arg: Some(com_arr.1.to_string()),
+    };
+
     com.args = Some(parse_comm(com_arr.1));
     com
 }
