@@ -17,7 +17,7 @@ fn main() {
     let mut exit = true;
 
     while exit {
-        io::stdout().flush().unwrap();
+        // io::stdout().flush().unwrap();
         print!("$ ");
         io::stdout().flush().unwrap();
 

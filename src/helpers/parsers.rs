@@ -1,5 +1,55 @@
 static ESCAPES: [char; 4] = ['\\', '\"', '`', ' '];
 
+pub fn get_tokens(input: String) -> Vec<String> {
+    let mut tokens: Vec<String> = Vec::new();
+    let mut token: Vec<(usize, char)> = Vec::new();
+
+    let input_iter = input.char_indices().peekable();
+    let delimiter: char = ' ';
+    let mut in_singles = false;
+    let mut in_doubles = false;
+
+    let parse_internal_quotes = |int: &usize, ch: &char| -> bool {
+        let mut in_singles_cl = false;
+        let mut in_doubles_cl = false;
+
+        if ch == &'"' && token[int - 1].1 != '\\' {
+            in_doubles_cl = !in_doubles_cl;
+        } else if ch == &'\'' && token[int - 1].1 != '\\' {
+            in_singles_cl = !in_singles_cl;
+        }
+        if ch == &delimiter && !in_singles_cl && !in_doubles_cl {
+            return true;
+        }
+        false
+    };
+
+    if delimiter == '\'' {
+        token = input_iter.take_while(|(i, a)| a != &delimiter).collect();
+    } else if delimiter == '"' {
+        token = input_iter
+            .take_while(|(i, a)| a != &delimiter && parse_internal_quotes(i, a))
+            // .take_while(|(i, a)| a != &delimiter && parse_quotes(a, &delimiter))
+            .collect();
+    }
+
+    let new_token = String::new();
+
+    tokens
+}
+pub fn parse_quotes(ch: &char, delimiter: &char) -> bool {
+    let mut in_doubles = false;
+    let in_singles = false;
+
+    if ch == &'"' && in_doubles {
+        in_doubles = !in_doubles;
+    }
+    if ch == delimiter && !in_singles && !in_doubles {
+        return true;
+    }
+    false
+}
+
 pub fn parse_comm(inp: &str) -> Vec<String> {
     let mut bar = inp.chars().peekable();
     let mut retvec: Vec<String> = Vec::new();
