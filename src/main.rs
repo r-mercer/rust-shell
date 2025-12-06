@@ -7,7 +7,7 @@ use std::process::Command;
 // use crate::actions::write;
 use crate::commands::builtin::exec_builtin;
 use crate::commands::command_type::{get_type, CommandType, LineCommand};
-use crate::helpers::parsers::parse_comm;
+use crate::helpers::parsers::{get_tokens, parse_comm};
 mod actions;
 mod commands;
 mod helpers;
@@ -24,7 +24,10 @@ fn main() {
         let mut stringput = String::new();
         io::stdin().read_line(&mut stringput).unwrap();
 
-        let command = parse_input(stringput);
+        let tokens = get_tokens(stringput);
+        let command = LineCommand::from_tokens(tokens);
+
+        // let command = parse_input(stringput);
 
         if command.execute == "exit" {
             exit = false;
@@ -63,7 +66,7 @@ fn parse_input(mut command: String) -> LineCommand {
         command = com_str.to_string();
     }
 
-    let mut com_arr = command
+    let com_arr = command
         .split_once(char)
         .unwrap_or_else(|| (command.trim(), ""));
 
@@ -80,7 +83,8 @@ fn parse_input(mut command: String) -> LineCommand {
     com
 }
 
-fn output(command: LineCommand) -> Result<(), io::Error> {
+fn output(inc_command: LineCommand) -> Result<(), io::Error> {
+    let command = inc_command.to_owned();
     let mut ret = String::new();
 
     if command.arg.is_some() && command.args.is_none() {
@@ -89,8 +93,7 @@ fn output(command: LineCommand) -> Result<(), io::Error> {
 
     match command.type_of {
         CommandType::BuiltIn => {
-            ret = exec_builtin(&command.execute, command.args.unwrap_or_default())?
-                .expect("something");
+            ret = exec_builtin(command)?.expect("something");
         }
         CommandType::OnUserPATH => {
             Command::new(command.execute)
@@ -106,8 +109,9 @@ fn output(command: LineCommand) -> Result<(), io::Error> {
         }
     }
 
-    if command.to_file {
-        actions::write::to_file(command.file_path.unwrap_or_default(), ret)?;
+    if command.to_file == true {
+        println!("We could have printed here {}", command.execute);
+        // actions::write::to_file(command.file_path.unwrap_or_default(), ret)?;
     } else {
         line_out(ret);
     }

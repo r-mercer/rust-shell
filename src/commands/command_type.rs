@@ -1,7 +1,10 @@
 // use std::path::PathBuf;
 
-use crate::commands::builtin::BUILTINS;
+use std::io;
 
+use crate::commands::builtin::{exec_builtin, BUILTINS};
+
+#[derive(Clone)]
 pub enum CommandType {
     BuiltIn,
     // BuiltInSilent,
@@ -9,13 +12,13 @@ pub enum CommandType {
     Absolute,
 }
 
+#[derive(Clone)]
 pub struct LineCommand {
     pub to_file: bool,
     pub file_path: Option<String>,
     pub type_of: CommandType,
     pub execute: String,
     pub args: Option<Vec<String>>,
-    pub arg: Option<String>,
 }
 
 impl LineCommand {
@@ -38,7 +41,7 @@ impl LineCommand {
     //     }
     //     self.args = self.args
     // }
-    fn from_tokens(input: Vec<String>) -> Self {
+    pub fn from_tokens(input: Vec<String>) -> Self {
         // input.trim();
         // let tokens = get_tokens(&input);
 
@@ -48,8 +51,28 @@ impl LineCommand {
             file_path: None,
             execute: input[0].clone(),
             args: None,
-            arg: None,
         }
+    }
+
+    pub fn execute_command(&self) -> Result<(), ()> {
+        match self.type_of {
+            CommandType::BuiltIn => {
+                let ret = exec_builtin(self).expect("something");
+            }
+            CommandType::OnUserPATH => {
+                Command::new(self.execute)
+                    .args(self.args.unwrap_or_default())
+                    .status()
+                    .unwrap_or_default();
+            }
+            CommandType::Absolute => {
+                Command::new(self.execute)
+                    .args(self.args.unwrap_or_default())
+                    .status()
+                    .unwrap_or_default();
+            }
+        }
+        Ok(())
     }
 
     fn from_input_string(input: String) -> Self {
@@ -61,7 +84,6 @@ impl LineCommand {
             file_path: None,
             execute: input,
             args: None,
-            arg: None,
         }
 
         // convert string to char array - or byte array if feeling zesty

@@ -1,10 +1,10 @@
 use std::env::{self};
 use std::env::{home_dir, set_current_dir};
+use std::fs;
 use std::io::Error;
 use std::path::PathBuf;
-use std::{char, fs};
 
-pub fn cd(path: Option<Vec<String>>) -> Result<(), Error> {
+pub fn cd(path: &Option<Vec<String>>) -> Result<(), Error> {
     let mut dest;
 
     if let Some(path_string) = path {
@@ -22,7 +22,7 @@ pub fn cd(path: Option<Vec<String>>) -> Result<(), Error> {
     set_current_dir(dest)
 }
 
-pub fn print_ls(inp: Option<Vec<String>>) -> Result<String, Error> {
+pub fn print_ls(inp: &Option<Vec<String>>) -> Result<String, Error> {
     let mut path_string = env::current_dir().unwrap_or_default();
     if let Some(prepath) = inp {
         path_string = PathBuf::from(prepath[0].clone());
@@ -53,7 +53,7 @@ pub fn print_wd() -> Result<String, Error> {
     Ok(ret.display().to_string())
 }
 
-pub fn echo(strs: Option<Vec<String>>) -> Result<String, Error> {
+pub fn echo(strs: &Option<Vec<String>>) -> Result<String, Error> {
     if let Some(paths) = strs {
         Ok(paths.join(" "))
     } else {
@@ -61,12 +61,12 @@ pub fn echo(strs: Option<Vec<String>>) -> Result<String, Error> {
     }
 }
 
-pub fn cat(strs: Option<Vec<String>>) -> Result<String, Error> {
+pub fn cat(strs: &Option<Vec<String>>) -> Result<String, Error> {
     // let mut list = Command::new("cat");
     // let strs: Vec<String> = parse_comm(str.trim());
     // let contents = fs::read_to_string(file_path).expect("Should have been able to read the file");
     let mut ret = String::new();
-    for path in strs.unwrap_or_default() {
+    for path in strs.clone().unwrap_or_default() {
         let contents = fs::read_to_string(path).expect("Should have been able to read the file");
         ret += &contents;
         ret.push(' ');

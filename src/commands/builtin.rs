@@ -2,7 +2,7 @@ use crate::commands::{command_type::LineCommand, ext};
 use pathsearch::find_executable_in_path;
 use std::io;
 
-pub fn exec_builtin(command: LineCommand) -> Result<Option<String>, io::Error> {
+pub fn exec_builtin(command: &LineCommand) -> Result<Option<String>, io::Error> {
     let matched_command = command.execute.as_str();
     match matched_command {
         // "admin" => (),
@@ -17,10 +17,10 @@ pub fn exec_builtin(command: LineCommand) -> Result<Option<String>, io::Error> {
         // "bg" => (),
         // "cal" => (),
         "cd" => {
-            ext::cd(command.args)?;
+            ext::cd(&command.args)?;
             Ok(None)
         }
-        "cat" => Ok(Some(ext::cat(command.args)?)),
+        "cat" => Ok(Some(ext::cat(&command.args)?)),
         // "cat" => return Ok(ext::cat(par)),
         // "cc" => (),
         // "cflow" => (),
@@ -45,7 +45,7 @@ pub fn exec_builtin(command: LineCommand) -> Result<Option<String>, io::Error> {
         // "diff" => (),
         // "dirname" => (),
         // "du" => (),
-        "echo" => Ok(Some(ext::echo(command.args)?)),
+        "echo" => Ok(Some(ext::echo(&command.args)?)),
         // "ed" => (),
         // "env" => (),
         // "ex" => (),
@@ -81,7 +81,7 @@ pub fn exec_builtin(command: LineCommand) -> Result<Option<String>, io::Error> {
         // "logger" => (),
         // "logname" => (),
         // "lp" => (),
-        "ls" => Ok(Some(ext::print_ls(command.args)?)),
+        "ls" => Ok(Some(ext::print_ls(&command.args)?)),
         // "m4" => (),
         // "mailx" => (),
         // "make" => (),
