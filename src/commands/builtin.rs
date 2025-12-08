@@ -3,7 +3,7 @@ use pathsearch::find_executable_in_path;
 use std::io;
 
 pub fn exec_builtin(command: &LineCommand) -> Result<Option<String>, io::Error> {
-    let matched_command = command.execute.as_str();
+    let matched_command = command.executable.as_ref();
     match matched_command {
         // "admin" => (),
         // "alias" => (),

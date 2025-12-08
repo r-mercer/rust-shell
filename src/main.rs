@@ -5,36 +5,52 @@ use std::io::Write;
 use std::process::Command;
 
 // use crate::actions::write;
-use crate::commands::builtin::exec_builtin;
-use crate::commands::command_type::{get_type, CommandType, LineCommand};
-use crate::helpers::parsers::{get_tokens, parse_comm};
+// use crate::commands::builtin::exec_builtin;
+use crate::commands::command_type::LineCommand;
+use crate::helpers::parsers::get_tokens;
 mod actions;
 mod commands;
 mod helpers;
 
 fn main() {
     // io::stdout().flush().unwrap();
-    let mut exit = true;
+    let mut exit = false;
 
-    while exit {
+    while !exit {
         // io::stdout().flush().unwrap();
         print!("$ ");
         io::stdout().flush().unwrap();
 
         let mut stringput = String::new();
         io::stdin().read_line(&mut stringput).unwrap();
+        println!("stringput{}", stringput);
 
         let tokens = get_tokens(stringput);
         let command = LineCommand::from_tokens(tokens);
 
-        // let command = parse_input(stringput);
-
-        if command.execute == "exit" {
-            exit = false;
+        if command.executable == "exit" {
+            exit = true;
             continue;
         }
 
-        let _ = output(command);
+        let result = command.execute_command();
+        match result {
+            Ok(t) => {
+                if command.to_file {
+                    let _ = actions::write::to_file(
+                        t.output.unwrap(),
+                        command.file_path.expect("path"),
+                    );
+                } else {
+                    println!(
+                        "should be printed to output path: {}",
+                        command.file_path.expect("path")
+                    );
+                }
+            }
+            Err(e) => println!("{}", e.output.unwrap()),
+        }
+        // let _ = output(command);
 
         // if Ok(builtin::check_string_output(com_arr.0, com_arr.1)) {
         //     continue;
@@ -52,74 +68,38 @@ fn main() {
     }
 }
 
-fn parse_input(mut command: String) -> LineCommand {
-    let mut char: &str = " ";
-    let mut com_str = command.trim();
-
-    if com_str.starts_with("'") {
-        char = "'";
-        com_str = com_str.strip_prefix("'").unwrap_or_default();
-        command = com_str.to_string();
-    } else if com_str.starts_with("\"") {
-        char = "\"";
-        com_str = com_str.strip_prefix("\"").unwrap_or_default();
-        command = com_str.to_string();
-    }
-
-    let com_arr = command
-        .split_once(char)
-        .unwrap_or_else(|| (command.trim(), ""));
-
-    let mut com = LineCommand {
-        file_path: None,
-        to_file: false,
-        type_of: get_type(&command),
-        execute: com_arr.0.to_string(),
-        args: None,
-        arg: Some(com_arr.1.to_string()),
-    };
-
-    com.args = Some(parse_comm(com_arr.1));
-    com
-}
-
-fn output(inc_command: LineCommand) -> Result<(), io::Error> {
-    let command = inc_command.to_owned();
-    let mut ret = String::new();
-
-    if command.arg.is_some() && command.args.is_none() {
-        println!("{}", "should we be printing this?")
-    }
-
-    match command.type_of {
-        CommandType::BuiltIn => {
-            ret = exec_builtin(command)?.expect("something");
-        }
-        CommandType::OnUserPATH => {
-            Command::new(command.execute)
-                .args(command.args.unwrap_or_default())
-                .status()
-                .unwrap_or_default();
-        }
-        CommandType::Absolute => {
-            Command::new(command.execute)
-                .args(command.args.unwrap_or_default())
-                .status()
-                .unwrap_or_default();
-        }
-    }
-
-    if command.to_file == true {
-        println!("We could have printed here {}", command.execute);
-        // actions::write::to_file(command.file_path.unwrap_or_default(), ret)?;
-    } else {
-        line_out(ret);
-    }
-    Ok(())
-}
-
-fn line_out(line: String) {
-    println!("{}", line);
-    // let _ = io::stdout().write_all(line.as_bytes());
-    // main();
-}
+// fn parse_input(mut command: String) -> LineCommand {
+//     let mut char: &str = " ";
+//     let mut com_str = command.trim();
+//
+//     if com_str.starts_with("'") {
+//         char = "'";
+//         com_str = com_str.strip_prefix("'").unwrap_or_default();
+//         command = com_str.to_string();
+//     } else if com_str.starts_with("\"") {
+//         char = "\"";
+//         com_str = com_str.strip_prefix("\"").unwrap_or_default();
+//         command = com_str.to_string();
+//     }
+//
+//     let com_arr = command
+//         .split_once(char)
+//         .unwrap_or_else(|| (command.trim(), ""));
+//
+//     let mut com = LineCommand {
+//         file_path: None,
+//         to_file: false,
+//         type_of: get_type(&command),
+//         executable: com_arr.0.to_string(),
+//         args: None,
+//     };
+//
+//     com.args = Some(parse_comm(com_arr.1));
+//     com
+// }
+//
+// fn line_out(line: String) {
+//     println!("{}", line);
+//     // let _ = io::stdout().write_all(line.as_bytes());
+//     // main();
+// }

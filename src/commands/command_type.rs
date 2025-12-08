@@ -1,13 +1,32 @@
 // use std::path::PathBuf;
 
-use std::io;
-
 use crate::commands::builtin::{exec_builtin, BUILTINS};
+use crate::Command;
+
+pub enum StatusCode {
+    Incomplete,
+    Success,
+    Failure,
+    Exit,
+}
+
+pub struct ResultCode {
+    pub status: StatusCode,
+    pub output: Option<String>,
+}
+
+impl ResultCode {
+    fn from_result() -> Self {
+        Self {
+            status: StatusCode::Incomplete,
+            output: None,
+        }
+    }
+}
 
 #[derive(Clone)]
 pub enum CommandType {
     BuiltIn,
-    // BuiltInSilent,
     OnUserPATH,
     Absolute,
 }
@@ -17,7 +36,7 @@ pub struct LineCommand {
     pub to_file: bool,
     pub file_path: Option<String>,
     pub type_of: CommandType,
-    pub execute: String,
+    pub executable: String,
     pub args: Option<Vec<String>>,
 }
 
@@ -42,55 +61,64 @@ impl LineCommand {
     //     self.args = self.args
     // }
     pub fn from_tokens(input: Vec<String>) -> Self {
-        // input.trim();
-        // let tokens = get_tokens(&input);
-
         Self {
             to_file: false,
-            type_of: CommandType::BuiltIn,
+            type_of: get_type(&input[0]),
             file_path: None,
-            execute: input[0].clone(),
+            executable: input[0].clone(),
             args: None,
         }
     }
 
-    pub fn execute_command(&self) -> Result<(), ()> {
+    pub fn execute_command(&self) -> Result<ResultCode, ResultCode> {
+        println!("execute:{}", &self.executable);
+        let mut return_result: ResultCode = ResultCode::from_result();
+
+        if &self.executable == "exit" {
+            return_result.status = StatusCode::Exit;
+            return Ok(return_result);
+        }
+
         match self.type_of {
             CommandType::BuiltIn => {
                 let ret = exec_builtin(self).expect("something");
+                if ret.is_some() {
+                    return_result.status = StatusCode::Success;
+                    Ok(return_result)
+                } else {
+                    return_result.status = StatusCode::Failure;
+                    Err(return_result)
+                }
             }
             CommandType::OnUserPATH => {
-                Command::new(self.execute)
-                    .args(self.args.unwrap_or_default())
+                let ret = Command::new(&self.executable)
+                    .args(self.args.as_ref().unwrap())
                     .status()
                     .unwrap_or_default();
+                if ret.success() {
+                    return_result.status = StatusCode::Success;
+                    Ok(return_result)
+                } else {
+                    return_result.status = StatusCode::Failure;
+                    Err(return_result)
+                }
             }
             CommandType::Absolute => {
-                Command::new(self.execute)
-                    .args(self.args.unwrap_or_default())
+                let ret = Command::new(&self.executable)
+                    .args(self.args.as_ref().unwrap())
                     .status()
                     .unwrap_or_default();
+                if ret.success() {
+                    return_result.status = StatusCode::Success;
+                    Ok(return_result)
+                } else {
+                    return_result.status = StatusCode::Failure;
+                    Err(return_result)
+                }
             }
         }
-        Ok(())
     }
 
-    fn from_input_string(input: String) -> Self {
-        input.trim();
-
-        Self {
-            to_file: false,
-            type_of: CommandType::BuiltIn,
-            file_path: None,
-            execute: input,
-            args: None,
-        }
-
-        // convert string to char array - or byte array if feeling zesty
-        // function to get next param
-        // pass word ending char to next word to word loop function
-        // Check special actions at some stage (pipe output)
-    }
     // fn get_next_token(self, delimiter: char, input: String) {
     //     // if delimiter is single quotes, find next delimiter and return token
     //     if delimiter == '\'' {}
