@@ -60,13 +60,15 @@ impl LineCommand {
     //     }
     //     self.args = self.args
     // }
-    pub fn from_tokens(input: Vec<String>) -> Self {
+    pub fn from_tokens(mut input: Vec<String>) -> Self {
+        // let exe = input.split_off(1);
+        let exe: String = input.drain(..1).collect();
         Self {
             to_file: false,
-            type_of: get_type(&input[0]),
+            type_of: get_type(&exe),
             file_path: None,
-            executable: input[0].clone(),
-            args: None,
+            executable: exe,
+            args: Some(input),
         }
     }
 
@@ -81,13 +83,18 @@ impl LineCommand {
 
         match self.type_of {
             CommandType::BuiltIn => {
-                let ret = exec_builtin(self).expect("something");
-                if ret.is_some() {
-                    return_result.status = StatusCode::Success;
-                    Ok(return_result)
-                } else {
-                    return_result.status = StatusCode::Failure;
-                    Err(return_result)
+                let ret = exec_builtin(self);
+                match ret {
+                    Ok(res) => {
+                        return_result.status = StatusCode::Success;
+                        return_result.output = res;
+                        Ok(return_result)
+                    }
+                    Err(err) => {
+                        return_result.status = StatusCode::Failure;
+                        return_result.output = Some(err.to_string());
+                        Err(return_result)
+                    }
                 }
             }
             CommandType::OnUserPATH => {

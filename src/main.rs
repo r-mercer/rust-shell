@@ -23,7 +23,7 @@ fn main() {
 
         let mut stringput = String::new();
         io::stdin().read_line(&mut stringput).unwrap();
-        println!("stringput{}", stringput);
+        // println!("stringput {}", stringput);
 
         let tokens = get_tokens(stringput);
         let command = LineCommand::from_tokens(tokens);
@@ -37,18 +37,19 @@ fn main() {
         match result {
             Ok(t) => {
                 if command.to_file {
-                    let _ = actions::write::to_file(
-                        t.output.unwrap(),
-                        command.file_path.expect("path"),
-                    );
-                } else {
                     println!(
                         "should be printed to output path: {}",
                         command.file_path.expect("path")
                     );
+                    // let _ = actions::write::to_file(
+                    //     t.output.unwrap(),
+                    //     command.file_path.expect("path"),
+                    // );
+                } else {
+                    println!("Output: {}", t.output.unwrap_or_default());
                 }
             }
-            Err(e) => println!("{}", e.output.unwrap()),
+            Err(e) => println!("{}", e.output.unwrap_or_default()),
         }
         // let _ = output(command);
 
