@@ -1,42 +1,45 @@
-static ESCAPES: [char; 4] = ['\\', '\"', '`', ' '];
+static ESCAPES: [u8; 4] = [b'\\', b'\"', b'`', b' '];
 
 // Handle Escapes when being added to token vec
 // Handle expansions at a different time?
 
 pub fn get_tokens(input: String) -> Vec<String> {
     let mut tokens: Vec<String> = Vec::new();
-    let mut input_iter = input.chars().peekable();
-    let input_chars: Vec<char> = input_iter.clone().collect();
-    let mut interval = 0;
+    let mut input_iter = input.bytes().peekable();
+    let input_chars: Vec<u8> = input_iter.clone().collect();
 
     while input_iter.peek().is_some() {
-        let delimiter: char = match input_iter.peek().unwrap() {
-            '\'' => '\'',
-            '"' => '"',
-            _ => ' ',
+        let delimiter: u8 = match input_iter.peek().unwrap() {
+            b'\'' => b'\'',
+            b'"' => b'"',
+            _ => b' ',
         };
         println!("delimiter:{}", delimiter);
         // let token: Vec<(usize, char)> = Vec::new();
-        let mut new_token = String::new();
+        // let mut new_token = String::new();
 
-        let parse_internal_quotes = |int: &usize, ch: &char| -> bool {
+        let parse_internal_quotes = |int: &usize, ch: &u8| -> bool {
+            println!("parse_internal_quotes {},{}", int, ch);
             let mut in_singles_cl = false;
             let mut in_doubles_cl = false;
 
-            if ch == &'"' && input_chars[int - 1] != '\\' {
+            if ch == &b'"' && input_chars[int - 1] != b'\\' {
                 in_doubles_cl = !in_doubles_cl;
-            } else if ch == &'\'' && input_chars[int - 1] != '\\' {
+                println!("double quotes: {}", in_doubles_cl);
+            } else if ch == &b'\'' && input_chars[int - 1] != b'\\' {
                 in_singles_cl = !in_singles_cl;
+                println!("single quotes: {}", in_singles_cl);
             }
             if ch == &delimiter && !in_singles_cl && !in_doubles_cl {
+                println!("int quotes returned true");
                 return true;
             }
             false
         };
 
-        let mut token_iter: Vec<char> = Vec::new();
+        let mut token_iter: Vec<u8> = Vec::new();
 
-        if delimiter == '\'' {
+        if delimiter == b'\'' {
             token_iter = input_iter
                 .by_ref()
                 .take_while(|a| a != &delimiter)
@@ -50,25 +53,22 @@ pub fn get_tokens(input: String) -> Vec<String> {
             token_iter = handle_escapes(token_builder);
         }
 
+        let new_token = String::from_utf8(token_iter).unwrap_or_default();
+
         // for t in token_iter {
-        let new_item = token_iter.display();
-        new_token.push(token_iter.concat());
+        //     new_token.push(t);
         // }
-        interval += 1;
+        // interval += 1;
         println!("new_token:{}", new_token);
         tokens.push(new_token);
-
-        if interval == 5 {
-            break;
-        }
     }
     tokens
 }
 
-fn handle_escapes(input: Vec<(usize, char)>) -> Vec<char> {
-    let mut output: Vec<char> = Vec::new();
+fn handle_escapes(input: Vec<(usize, u8)>) -> Vec<u8> {
+    let mut output: Vec<u8> = Vec::new();
     for in_char in &input {
-        if in_char.1 == '\\' && ESCAPES.contains(&input[in_char.0 + 1].1) {
+        if in_char.1 == b'\\' && ESCAPES.contains(&input[in_char.0 + 1].1) {
             break;
         } else {
             output.push(in_char.1);
