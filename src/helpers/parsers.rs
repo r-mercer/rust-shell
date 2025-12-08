@@ -5,27 +5,27 @@ static ESCAPES: [char; 4] = ['\\', '\"', '`', ' '];
 
 pub fn get_tokens(input: String) -> Vec<String> {
     let mut tokens: Vec<String> = Vec::new();
-    let mut input_iter = input.char_indices().peekable();
+    let mut input_iter = input.chars().peekable();
+    let input_chars: Vec<char> = input_iter.clone().collect();
     let mut interval = 0;
 
     while input_iter.peek().is_some() {
-        let delimiter: char = match input_iter.peek().unwrap().1 {
+        let delimiter: char = match input_iter.peek().unwrap() {
             '\'' => '\'',
             '"' => '"',
             _ => ' ',
         };
         println!("delimiter:{}", delimiter);
-        let token: Vec<(usize, char)> = Vec::new();
+        // let token: Vec<(usize, char)> = Vec::new();
         let mut new_token = String::new();
-        let mut token_iter: Vec<char> = Vec::new();
 
         let parse_internal_quotes = |int: &usize, ch: &char| -> bool {
             let mut in_singles_cl = false;
             let mut in_doubles_cl = false;
 
-            if ch == &'"' && token[int - 1].1 != '\\' {
+            if ch == &'"' && input_chars[int - 1] != '\\' {
                 in_doubles_cl = !in_doubles_cl;
-            } else if ch == &'\'' && token[int - 1].1 != '\\' {
+            } else if ch == &'\'' && input_chars[int - 1] != '\\' {
                 in_singles_cl = !in_singles_cl;
             }
             if ch == &delimiter && !in_singles_cl && !in_doubles_cl {
@@ -33,35 +33,27 @@ pub fn get_tokens(input: String) -> Vec<String> {
             }
             false
         };
-        let mut inpter;
+
+        let mut token_iter: Vec<char> = Vec::new();
 
         if delimiter == '\'' {
-            inpter = input_iter
-                .position(|(_a, b)| b != delimiter)
-                .expect("message");
-            // token_iter = input_iter
-            //     .by_ref()
-            //     .take_while(|a| a != &delimiter)
-            //     .collect();
+            token_iter = input_iter
+                .by_ref()
+                .take_while(|a| a != &delimiter)
+                .collect();
         } else {
-            inpter = input_iter
-                .position(|(a, b)| b != delimiter && parse_internal_quotes(&a, &b))
-                .expect("message");
-            // token = input_iter
-            //     .by_ref()
-            //     .enumerate()
-            //     .take_while(|(a, b)| b != &delimiter && parse_internal_quotes(a, b))
-            //     .collect();
-            token_iter = handle_escapes(token);
+            let token_builder = input_iter
+                .by_ref()
+                .enumerate()
+                .take_while(|(a, b)| b != &delimiter && parse_internal_quotes(a, b))
+                .collect();
+            token_iter = handle_escapes(token_builder);
         }
 
-        while inpter != 0 {
-            new_token.push(input_iter.next().unwrap().1);
-            inpter -= 1;
-        }
-        for t in token_iter {
-            new_token.push(t);
-        }
+        // for t in token_iter {
+        let new_item = token_iter.display();
+        new_token.push(token_iter.concat());
+        // }
         interval += 1;
         println!("new_token:{}", new_token);
         tokens.push(new_token);
