@@ -41,14 +41,14 @@ fn main() {
             match result {
                 Ok(t) => {
                     if command.to_file {
-                        println!(
-                            "should be printed to output path: {}",
-                            command.file_path.expect("path")
-                        );
-                        // let _ = actions::write::to_file(
-                        //     t.output.unwrap(),
-                        //     command.file_path.expect("path"),
+                        // println!(
+                        //     "should be printed to output path: {}",
+                        //     command.file_path.expect("path")
                         // );
+                        let _ = actions::write::to_file(
+                            t.output.unwrap(),
+                            command.file_path.expect("path"),
+                        );
                     } else {
                         println!("Output: {}", t.output.unwrap_or_default());
                     }

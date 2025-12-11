@@ -3,7 +3,7 @@
 use crate::commands::builtin::{exec_builtin, BUILTINS};
 use crate::Command;
 
-static OUTPUTS: [&str; 2] = [">", "1>"];
+// static OUTPUTS: [&str; 2] = [">", "1>"];
 
 pub enum StatusCode {
     Incomplete,
