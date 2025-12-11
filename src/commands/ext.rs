@@ -4,6 +4,8 @@ use std::fs;
 use std::io::Error;
 use std::path::PathBuf;
 
+use crate::commands::command_type::ResultCode;
+
 pub fn cd(path: &Option<Vec<String>>) -> Result<(), Error> {
     let mut dest;
 
@@ -22,13 +24,15 @@ pub fn cd(path: &Option<Vec<String>>) -> Result<(), Error> {
     set_current_dir(dest)
 }
 
-pub fn print_ls(inp: &Option<Vec<String>>) -> Result<String, Error> {
+pub fn print_ls(inp: &Option<Vec<String>>) -> Result<ResultCode, Error> {
     let mut path_string = env::current_dir().unwrap_or_default();
-    if let Some(prepath) = inp {
-        path_string = PathBuf::from(prepath[0].clone());
+    if let Some(prepath) = inp.to_owned() {
+        if !prepath.is_empty() {
+            path_string = PathBuf::from(prepath[0].clone());
+        }
     }
 
-    let mut ret = String::new();
+    let mut ret_vec: Vec<String> = Vec::new();
 
     for entry in fs::read_dir(path_string)? {
         let entry = entry?;
@@ -36,42 +40,37 @@ pub fn print_ls(inp: &Option<Vec<String>>) -> Result<String, Error> {
 
         if path.is_dir() {
             println!("  [DIR] {}", path.display());
-            ret.push_str(path.to_str().unwrap_or_default());
+            ret_vec.push(path.to_str().unwrap_or_default().to_string());
         } else if path.is_file() {
-            ret.push_str(path.to_str().unwrap_or_default());
+            ret_vec.push(path.to_str().unwrap_or_default().to_string());
             println!("  [FILE] {}", path.display());
         } else {
-            ret.push_str(path.to_str().unwrap_or_default());
             println!("  [OTHER] {}", path.display());
+            ret_vec.push(path.to_str().unwrap_or_default().to_string());
         }
     }
-    Ok(ret)
+    Ok(ResultCode::from_vec(ret_vec))
 }
 
-pub fn print_wd() -> Result<String, Error> {
+pub fn print_wd() -> Result<ResultCode, Error> {
     let ret = env::current_dir()?;
-    Ok(ret.display().to_string())
+    Ok(ResultCode::from_str(ret.display().to_string()))
 }
 
-pub fn echo(strs: &Option<Vec<String>>) -> Result<String, Error> {
+pub fn echo(strs: &Option<Vec<String>>) -> Result<ResultCode, Error> {
     if let Some(paths) = strs {
-        Ok(paths.join(" "))
+        Ok(ResultCode::from_vec(paths.to_vec()))
     } else {
-        Ok(String::from(""))
+        Ok(ResultCode::from_none())
     }
 }
 
-pub fn cat(strs: &Option<Vec<String>>) -> Result<String, Error> {
-    // let mut list = Command::new("cat");
-    // let strs: Vec<String> = parse_comm(str.trim());
-    // let contents = fs::read_to_string(file_path).expect("Should have been able to read the file");
-    let mut ret = String::new();
+pub fn cat(strs: &Option<Vec<String>>) -> Result<ResultCode, Error> {
+    let mut ret_vec = Vec::new();
     for path in strs.clone().unwrap_or_default() {
-        let contents = fs::read_to_string(path).expect("Should have been able to read the file");
-        ret += &contents;
-        ret.push(' ');
+        ret_vec.push(fs::read_to_string(path).expect("Should have been able to read the file"));
     }
-    Ok(ret)
+    Ok(ResultCode::from_vec(ret_vec))
 }
 
 // #[allow(dead_code)]

@@ -12,16 +12,51 @@ pub enum StatusCode {
     Exit,
 }
 
+pub enum OutputType {
+    Str,
+    Vec,
+    None,
+    File,
+}
+
 pub struct ResultCode {
     pub status: StatusCode,
-    pub output: Option<String>,
+    pub output_type: OutputType,
+    pub output_str: Option<String>,
+    pub output_vec: Option<Vec<String>>,
 }
 
 impl ResultCode {
     fn from_result() -> Self {
         Self {
             status: StatusCode::Incomplete,
-            output: None,
+            output_type: OutputType::None,
+            output_str: None,
+            output_vec: None,
+        }
+    }
+    pub fn from_none() -> Self {
+        Self {
+            status: StatusCode::Success,
+            output_type: OutputType::None,
+            output_str: None,
+            output_vec: None,
+        }
+    }
+    pub fn from_str(input: String) -> Self {
+        Self {
+            status: StatusCode::Success,
+            output_type: OutputType::Str,
+            output_str: Some(input),
+            output_vec: None,
+        }
+    }
+    pub fn from_vec(input: Vec<String>) -> Self {
+        Self {
+            status: StatusCode::Success,
+            output_type: OutputType::Vec,
+            output_str: None,
+            output_vec: Some(input),
         }
     }
 }

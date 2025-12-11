@@ -46,14 +46,14 @@ fn main() {
                         //     command.file_path.expect("path")
                         // );
                         let _ = actions::write::to_file(
-                            t.output.unwrap(),
+                            t.output_string.unwrap(),
                             command.file_path.expect("path"),
                         );
                     } else {
-                        println!("Output: {}", t.output.unwrap_or_default());
+                        println!("Output: {}", t.output_string.unwrap_or_default());
                     }
                 }
-                Err(e) => println!("{}", e.output.unwrap_or_default()),
+                Err(e) => println!("{}", e.output_string.unwrap_or_default()),
             }
         }
         // let _ = output(command);
