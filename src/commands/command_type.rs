@@ -3,6 +3,8 @@
 use crate::commands::builtin::{exec_builtin, BUILTINS};
 use crate::Command;
 
+static OUTPUTS: [&str; 2] = [">", "1>"];
+
 pub enum StatusCode {
     Incomplete,
     Success,
@@ -60,9 +62,40 @@ impl LineCommand {
     //     }
     //     self.args = self.args
     // }
-    pub fn from_tokens(mut input: Vec<String>) -> Self {
-        // let exe = input.split_off(1);
+    // pub fn from_many_tokens(mut input: Vec<String>) -> Vec<Self> {}
+    // pub fn from_tokens_w_output(mut input: Vec<String>, output: bool) -> Self {
+    //     let exe: String = input.drain(..1).collect();
+    //     // if input.contains(OUTPUTS)
+    //     let inter = input.iter().position(|x| OUTPUTS.contains(&x.as_str()));
+    //     if let Some(inter) = int {
+    //         let write_to = input.partition_point(|x| OUTPUTS.contains(&x.as_str()));
+    //         file_path =
+    //     }
+    //
+    //     Self {
+    //         to_file: output,
+    //         type_of: get_type(&exe),
+    //         file_path: None,
+    //         executable: exe,
+    //         args: Some(input),
+    //     }
+    // }
+
+    pub fn from_tokens_print(mut input: Vec<String>, mut out_input: Vec<String>) -> Self {
         let exe: String = input.drain(..1).collect();
+
+        Self {
+            to_file: true,
+            type_of: get_type(&exe),
+            file_path: out_input.pop(),
+            executable: exe,
+            args: Some(input),
+        }
+    }
+
+    pub fn from_tokens(mut input: Vec<String>) -> Self {
+        let exe: String = input.drain(..1).collect();
+
         Self {
             to_file: false,
             type_of: get_type(&exe),
@@ -72,8 +105,30 @@ impl LineCommand {
         }
     }
 
+    pub fn vec_from_tokens(input: Vec<String>) -> Vec<LineCommand> {
+        let mut ret_vec: Vec<LineCommand> = Vec::new();
+
+        let mut command_iter = input.split(|x| x == "||").peekable();
+
+        while command_iter.peek().is_some() {
+            let vec = command_iter.next().unwrap();
+            let int = vec.iter().position(|x| x == "1>");
+            if let Some(int) = int {
+                let (new_command, output) = vec.split_at(int);
+                let com = LineCommand::from_tokens_print(new_command.to_vec(), output.to_vec());
+                ret_vec.push(com);
+            } else {
+                let com = LineCommand::from_tokens(vec.to_vec());
+                ret_vec.push(com);
+            }
+        }
+        ret_vec
+    }
+
+    // pub fn check_output() {}
+
     pub fn execute_command(&self) -> Result<ResultCode, ResultCode> {
-        println!("execute:{}", &self.executable);
+        // println!("execute:{}", &self.executable);
         let mut return_result: ResultCode = ResultCode::from_result();
 
         if &self.executable == "exit" {
@@ -104,6 +159,7 @@ impl LineCommand {
                     .unwrap_or_default();
                 if ret.success() {
                     return_result.status = StatusCode::Success;
+                    // return_result.output = ;
                     Ok(return_result)
                 } else {
                     return_result.status = StatusCode::Failure;

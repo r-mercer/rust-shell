@@ -28,30 +28,29 @@ pub fn get_tokens(input: String) -> Vec<String> {
                 in_singles_cl = !in_singles_cl;
             }
             if ch == &delimiter && !in_singles_cl && !in_doubles_cl {
-                return false;
+                return delimiter != b' ' && input_chars[int + 1].1 != b' ';
             }
             true
         };
 
-        let mut token_iter: Vec<u8> = Vec::new();
-        let mut token_int_iter: Vec<usize> = Vec::new();
-        let mut new_token = String::new();
+        // let mut token_iter: Vec<u8> = Vec::new();
+        // let mut token_int_iter: Vec<usize> = Vec::new();
+        // let new_token: String;
 
         if delimiter == b'\'' {
             let token_builder = input_iter.by_ref().take_while(|(_a, b)| b != &delimiter);
-            (token_int_iter, token_iter) = token_builder.unzip();
-            new_token = String::from_utf8(token_iter).unwrap_or_default();
+            let (_token_int_iter, token_iter): (Vec<usize>, Vec<u8>) = token_builder.unzip();
+            let new_token = String::from_utf8(token_iter).unwrap_or_default();
+            tokens.push(new_token);
         } else {
             let token_builder: Vec<(usize, u8)> = input_iter
                 .by_ref()
                 .take_while(|(a, b)| b != &delimiter && parse_internal_quotes(a, b))
                 .collect();
-            token_iter = handle_escapes(token_builder);
-            new_token = String::from_utf8(token_iter).unwrap_or_default();
+            let token_iter = handle_escapes(token_builder);
+            let new_token = String::from_utf8(token_iter).unwrap_or_default();
+            tokens.push(new_token);
         }
-
-        println!("new_token:{}", new_token);
-        tokens.push(new_token);
     }
     tokens
 }

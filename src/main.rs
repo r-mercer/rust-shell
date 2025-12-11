@@ -26,30 +26,35 @@ fn main() {
         // println!("stringput {}", stringput);
 
         let tokens = get_tokens(stringput);
-        let command = LineCommand::from_tokens(tokens);
+        // let command_vec = command_type::vec_from_tokens(stringput);
+        let command_vec = LineCommand::vec_from_tokens(tokens);
 
-        if command.executable == "exit" {
-            exit = true;
-            continue;
-        }
+        for command in command_vec {
+            // let command = LineCommand::from_tokens(tokens);
 
-        let result = command.execute_command();
-        match result {
-            Ok(t) => {
-                if command.to_file {
-                    println!(
-                        "should be printed to output path: {}",
-                        command.file_path.expect("path")
-                    );
-                    // let _ = actions::write::to_file(
-                    //     t.output.unwrap(),
-                    //     command.file_path.expect("path"),
-                    // );
-                } else {
-                    println!("Output: {}", t.output.unwrap_or_default());
-                }
+            if command.executable == "exit" {
+                exit = true;
+                continue;
             }
-            Err(e) => println!("{}", e.output.unwrap_or_default()),
+
+            let result = command.execute_command();
+            match result {
+                Ok(t) => {
+                    if command.to_file {
+                        println!(
+                            "should be printed to output path: {}",
+                            command.file_path.expect("path")
+                        );
+                        // let _ = actions::write::to_file(
+                        //     t.output.unwrap(),
+                        //     command.file_path.expect("path"),
+                        // );
+                    } else {
+                        println!("Output: {}", t.output.unwrap_or_default());
+                    }
+                }
+                Err(e) => println!("{}", e.output.unwrap_or_default()),
+            }
         }
         // let _ = output(command);
 
