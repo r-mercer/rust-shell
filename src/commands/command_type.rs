@@ -16,7 +16,7 @@ pub enum OutputType {
     Str,
     Vec,
     None,
-    File,
+    // File,
 }
 
 pub struct ResultCode {
@@ -27,7 +27,7 @@ pub struct ResultCode {
 }
 
 impl ResultCode {
-    fn from_result() -> Self {
+    pub fn from_result() -> Self {
         Self {
             status: StatusCode::Incomplete,
             output_type: OutputType::None,
@@ -176,13 +176,14 @@ impl LineCommand {
                 let ret = exec_builtin(self);
                 match ret {
                     Ok(res) => {
-                        return_result.status = StatusCode::Success;
-                        return_result.output = res;
-                        Ok(return_result)
+                        Ok(res)
+                        // return_result.status = StatusCode::Success;
+                        // return_result.output = res;
+                        // Ok(return_result)
                     }
                     Err(err) => {
                         return_result.status = StatusCode::Failure;
-                        return_result.output = Some(err.to_string());
+                        return_result.output_str = Some(err.to_string());
                         Err(return_result)
                     }
                 }

@@ -6,7 +6,7 @@ use std::path::PathBuf;
 
 use crate::commands::command_type::ResultCode;
 
-pub fn cd(path: &Option<Vec<String>>) -> Result<(), Error> {
+pub fn cd(path: &Option<Vec<String>>) -> Result<ResultCode, Error> {
     let mut dest;
 
     if let Some(path_string) = path {
@@ -20,8 +20,8 @@ pub fn cd(path: &Option<Vec<String>>) -> Result<(), Error> {
         dest = home_dir().expect("no home dir");
         set_current_dir(&dest).expect("No Home Dir");
     }
-
-    set_current_dir(dest)
+    set_current_dir(dest);
+    Ok(ResultCode::from_none())
 }
 
 pub fn print_ls(inp: &Option<Vec<String>>) -> Result<ResultCode, Error> {

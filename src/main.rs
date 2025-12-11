@@ -6,7 +6,7 @@ use std::process::Command;
 
 // use crate::actions::write;
 // use crate::commands::builtin::exec_builtin;
-use crate::commands::command_type::LineCommand;
+use crate::commands::command_type::{LineCommand, OutputType};
 use crate::helpers::parsers::get_tokens;
 mod actions;
 mod commands;
@@ -23,15 +23,11 @@ fn main() {
 
         let mut stringput = String::new();
         io::stdin().read_line(&mut stringput).unwrap();
-        // println!("stringput {}", stringput);
 
         let tokens = get_tokens(stringput);
-        // let command_vec = command_type::vec_from_tokens(stringput);
         let command_vec = LineCommand::vec_from_tokens(tokens);
 
         for command in command_vec {
-            // let command = LineCommand::from_tokens(tokens);
-
             if command.executable == "exit" {
                 exit = true;
                 continue;
@@ -39,21 +35,25 @@ fn main() {
 
             let result = command.execute_command();
             match result {
-                Ok(t) => {
-                    if command.to_file {
-                        // println!(
-                        //     "should be printed to output path: {}",
-                        //     command.file_path.expect("path")
-                        // );
+                Ok(t) => match t.output_type {
+                    OutputType::Str => {
                         let _ = actions::write::to_file(
-                            t.output_string.unwrap(),
+                            t.output_str.unwrap(),
                             command.file_path.expect("path"),
                         );
-                    } else {
-                        println!("Output: {}", t.output_string.unwrap_or_default());
                     }
-                }
-                Err(e) => println!("{}", e.output_string.unwrap_or_default()),
+                    OutputType::Vec => {
+                        let _ = actions::write::to_file(
+                            t.output_str.unwrap(),
+                            command.file_path.expect("path"),
+                        );
+                    }
+                    OutputType::None => {}
+                },
+                // } else {
+                //     println!("Output: {}", t.output_str.unwrap_or_default());
+                // }
+                Err(e) => println!("{}", e.output_str.unwrap_or_default()),
             }
         }
         // let _ = output(command);

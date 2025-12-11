@@ -1,8 +1,11 @@
-use crate::commands::{command_type::LineCommand, ext};
+use crate::commands::{
+    command_type::{LineCommand, ResultCode},
+    ext,
+};
 use pathsearch::find_executable_in_path;
 use std::io;
 
-pub fn exec_builtin(command: &LineCommand) -> Result<Option<String>, io::Error> {
+pub fn exec_builtin(command: &LineCommand) -> Result<ResultCode, io::Error> {
     let matched_command = command.executable.as_ref();
     match matched_command {
         // "admin" => (),
@@ -16,11 +19,8 @@ pub fn exec_builtin(command: &LineCommand) -> Result<Option<String>, io::Error> 
         // "bc" => (),
         // "bg" => (),
         // "cal" => (),
-        "cd" => {
-            ext::cd(&command.args)?;
-            Ok(None)
-        }
-        "cat" => Ok(Some(ext::cat(&command.args)?)),
+        "cd" => Ok(ext::cd(&command.args)?),
+        "cat" => Ok(ext::cat(&command.args)?),
         // "cat" => return Ok(ext::cat(par)),
         // "cc" => (),
         // "cflow" => (),
@@ -45,7 +45,7 @@ pub fn exec_builtin(command: &LineCommand) -> Result<Option<String>, io::Error> 
         // "diff" => (),
         // "dirname" => (),
         // "du" => (),
-        "echo" => Ok(Some(ext::echo(&command.args)?)),
+        "echo" => Ok(ext::echo(&command.args)?),
         // "ed" => (),
         // "env" => (),
         // "ex" => (),
@@ -81,7 +81,7 @@ pub fn exec_builtin(command: &LineCommand) -> Result<Option<String>, io::Error> 
         // "logger" => (),
         // "logname" => (),
         // "lp" => (),
-        "ls" => Ok(Some(ext::print_ls(&command.args)?)),
+        "ls" => Ok(ext::print_ls(&command.args)?),
         // "m4" => (),
         // "mailx" => (),
         // "make" => (),
@@ -107,7 +107,7 @@ pub fn exec_builtin(command: &LineCommand) -> Result<Option<String>, io::Error> 
         // "printf" => (),
         // "prs" => (),
         // "ps" => (),
-        "pwd" => Ok(Some(ext::print_wd()?)),
+        "pwd" => Ok(ext::print_wd()?),
         // "read" => (),
         // "readlink" => (),
         // "realpath" => (),
@@ -140,12 +140,23 @@ pub fn exec_builtin(command: &LineCommand) -> Result<Option<String>, io::Error> 
         // "tty" => (),
         "type" => {
             if BUILTINS.contains(&matched_command) {
-                Ok(Some(format!("{} is a shell builtin", matched_command)))
+                Ok(ResultCode::from_str(format!(
+                    "{} is a shell builtin",
+                    matched_command
+                )))
             } else if let Some(path) = find_executable_in_path(&matched_command) {
-                Ok(Some(format!("{} is {}", matched_command, path.display())))
+                Ok(ResultCode::from_str(format!(
+                    "{} is {}",
+                    matched_command,
+                    path.display()
+                )))
             } else {
-                Ok(Some(format!("{}: not found", matched_command)))
+                Ok(ResultCode::from_str(format!(
+                    "{}: not found",
+                    matched_command
+                )))
             }
+            // Ok(ResultCode::from_str(ret))
         }
         // "ulimit" => (),
         // "umask" => (),
@@ -172,7 +183,7 @@ pub fn exec_builtin(command: &LineCommand) -> Result<Option<String>, io::Error> 
         // "xgettext" => (),
         // "yacc" => (),
         // "zcat" => (),
-        _ => Ok(None),
+        _ => Ok(ResultCode::from_result()),
     }
 }
 
