@@ -13,11 +13,9 @@ mod commands;
 mod helpers;
 
 fn main() {
-    // io::stdout().flush().unwrap();
     let mut exit = false;
 
     while !exit {
-        // io::stdout().flush().unwrap();
         print!("$ ");
         io::stdout().flush().unwrap();
 
@@ -37,16 +35,10 @@ fn main() {
             match result {
                 Ok(t) => match t.output_type {
                     OutputType::Str => {
-                        let _ = actions::write::to_file(
-                            t.output_str.unwrap(),
-                            command.file_path.expect("path"),
-                        );
+                        let _ = actions::write::output_to(&command, &t);
                     }
                     OutputType::Vec => {
-                        let _ = actions::write::to_file(
-                            t.output_str.unwrap(),
-                            command.file_path.expect("path"),
-                        );
+                        let _ = actions::write::output_to_vec(&command, &t);
                     }
                     OutputType::None => {}
                 },

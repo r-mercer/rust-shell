@@ -33,10 +33,6 @@ pub fn get_tokens(input: String) -> Vec<String> {
             true
         };
 
-        // let mut token_iter: Vec<u8> = Vec::new();
-        // let mut token_int_iter: Vec<usize> = Vec::new();
-        // let new_token: String;
-
         if delimiter == b'\'' {
             let token_builder = input_iter.by_ref().take_while(|(_a, b)| b != &delimiter);
             let (_token_int_iter, token_iter): (Vec<usize>, Vec<u8>) = token_builder.unzip();

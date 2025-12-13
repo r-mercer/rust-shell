@@ -4,12 +4,13 @@ use std::fs;
 use std::io::Error;
 use std::path::PathBuf;
 
-use crate::commands::command_type::ResultCode;
+use crate::commands::command_type::{LineCommand, ResultCode};
 
-pub fn cd(path: &Option<Vec<String>>) -> Result<ResultCode, Error> {
+// pub fn cd(path: &Option<Vec<String>>) -> Result<ResultCode, Error> {
+pub fn cd(command: &LineCommand) -> Result<ResultCode, Error> {
     let mut dest;
 
-    if let Some(path_string) = path {
+    if let Some(path_string) = &command.args {
         dest = PathBuf::from(path_string.concat());
     } else {
         dest = env::current_dir()?;
@@ -20,13 +21,13 @@ pub fn cd(path: &Option<Vec<String>>) -> Result<ResultCode, Error> {
         dest = home_dir().expect("no home dir");
         set_current_dir(&dest).expect("No Home Dir");
     }
-    set_current_dir(dest);
+    set_current_dir(dest)?;
     Ok(ResultCode::from_none())
 }
 
-pub fn print_ls(inp: &Option<Vec<String>>) -> Result<ResultCode, Error> {
+pub fn print_ls(command: &LineCommand) -> Result<ResultCode, Error> {
     let mut path_string = env::current_dir().unwrap_or_default();
-    if let Some(prepath) = inp.to_owned() {
+    if let Some(prepath) = command.args.to_owned() {
         if !prepath.is_empty() {
             path_string = PathBuf::from(prepath[0].clone());
         }
@@ -39,13 +40,13 @@ pub fn print_ls(inp: &Option<Vec<String>>) -> Result<ResultCode, Error> {
         let path = entry.path();
 
         if path.is_dir() {
-            println!("  [DIR] {}", path.display());
+            // println!("  [DIR] {}", path.display());
             ret_vec.push(path.to_str().unwrap_or_default().to_string());
         } else if path.is_file() {
+            // println!("  [FILE] {}", path.display());
             ret_vec.push(path.to_str().unwrap_or_default().to_string());
-            println!("  [FILE] {}", path.display());
         } else {
-            println!("  [OTHER] {}", path.display());
+            // println!("  [OTHER] {}", path.display());
             ret_vec.push(path.to_str().unwrap_or_default().to_string());
         }
     }
@@ -57,17 +58,17 @@ pub fn print_wd() -> Result<ResultCode, Error> {
     Ok(ResultCode::from_str(ret.display().to_string()))
 }
 
-pub fn echo(strs: &Option<Vec<String>>) -> Result<ResultCode, Error> {
-    if let Some(paths) = strs {
+pub fn echo(command: &LineCommand) -> Result<ResultCode, Error> {
+    if let Some(paths) = &command.args {
         Ok(ResultCode::from_vec(paths.to_vec()))
     } else {
         Ok(ResultCode::from_none())
     }
 }
 
-pub fn cat(strs: &Option<Vec<String>>) -> Result<ResultCode, Error> {
+pub fn cat(command: &LineCommand) -> Result<ResultCode, Error> {
     let mut ret_vec = Vec::new();
-    for path in strs.clone().unwrap_or_default() {
+    for path in command.args.clone().unwrap_or_default() {
         ret_vec.push(fs::read_to_string(path).expect("Should have been able to read the file"));
     }
     Ok(ResultCode::from_vec(ret_vec))
