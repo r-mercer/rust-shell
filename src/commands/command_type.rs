@@ -109,18 +109,36 @@ impl LineCommand {
         let mut ret_vec: Vec<LineCommand> = Vec::new();
         let mut command_iter = input.split(|x| x == "||").peekable();
 
-        while command_iter.peek().is_some() {
-            let vec = command_iter.next().unwrap();
-            let int = vec.iter().position(|x| x == "1>" || x == ">");
-
-            if let Some(int) = int {
-                let (new_command, output) = vec.split_at(int);
-                let com = LineCommand::from_tokens_print(new_command.to_vec(), output.to_vec());
-                ret_vec.push(com);
-            } else {
-                let com = LineCommand::from_tokens(vec.to_vec());
-                ret_vec.push(com);
+        while let Some(vec) = command_iter.next() {
+            // Improved: support for '> file' after command (ignore '1>' for now, as not supported)
+            let mut i = 0;
+            let mut file_path: Option<String> = None;
+            let mut cmd_tokens: Vec<String> = Vec::new();
+            while i < vec.len() {
+                if vec[i] == ">" {
+                    // Next token is output file if present
+                    if i + 1 < vec.len() {
+                        file_path = Some(vec[i + 1].clone());
+                        i += 2;
+                        // Skip extra > and file tokens (only handle one redirection)
+                        break;
+                    } else {
+                        i += 1;
+                    }
+                } else {
+                    cmd_tokens.push(vec[i].clone());
+                    i += 1;
+                }
             }
+            // Collect any trailing tokens as they may be part of the file path (bad syntax)
+            let mut line_command = if !cmd_tokens.is_empty() {
+                LineCommand::from_tokens(cmd_tokens)
+            } else {
+                // fallback: treat as empty command (shouldn't occur)
+                LineCommand::from_tokens(vec![])
+            };
+            line_command.file_path = file_path;
+            ret_vec.push(line_command);
         }
         ret_vec
     }
@@ -151,30 +169,83 @@ impl LineCommand {
                 }
             }
             CommandType::OnUserPATH => {
-                let ret = Command::new(&self.executable)
-                    .args(self.args.as_ref().unwrap())
-                    .status()
-                    .unwrap_or_default();
-                if ret.success() {
-                    return_result.status = StatusCode::Success;
-                    // return_result.output = ;
-                    Ok(return_result)
+                use std::process::Stdio;
+                let mut cmd = Command::new(&self.executable);
+                if let Some(args) = self.args.as_ref() {
+                    cmd.args(args);
+                }
+                if let Some(path) = self.file_path.as_ref() {
+                    // Redirect output to file
+                    match std::fs::File::create(path) {
+                        Ok(file) => {
+                            let child = cmd.stdout(Stdio::from(file)).status();
+                            match child {
+                                Ok(status) if status.success() => {
+                                    return_result.status = StatusCode::Success;
+                                    Ok(return_result)
+                                }
+                                Ok(_) | Err(_) => {
+                                    return_result.status = StatusCode::Failure;
+                                    Err(return_result)
+                                }
+                            }
+                        }
+                        Err(e) => {
+                            return_result.status = StatusCode::Failure;
+                            return_result.output_str =
+                                Some(format!("Redirection file error: {}", e));
+                            Err(return_result)
+                        }
+                    }
                 } else {
-                    return_result.status = StatusCode::Failure;
-                    Err(return_result)
+                    let ret = cmd.status().unwrap_or_default();
+                    if ret.success() {
+                        return_result.status = StatusCode::Success;
+                        Ok(return_result)
+                    } else {
+                        return_result.status = StatusCode::Failure;
+                        Err(return_result)
+                    }
                 }
             }
             CommandType::Absolute => {
-                let ret = Command::new(&self.executable)
-                    .args(self.args.as_ref().unwrap())
-                    .status()
-                    .unwrap_or_default();
-                if ret.success() {
-                    return_result.status = StatusCode::Success;
-                    Ok(return_result)
+                use std::process::Stdio;
+                let mut cmd = Command::new(&self.executable);
+                if let Some(args) = self.args.as_ref() {
+                    cmd.args(args);
+                }
+                if let Some(path) = self.file_path.as_ref() {
+                    // Redirect output to file
+                    match std::fs::File::create(path) {
+                        Ok(file) => {
+                            let child = cmd.stdout(Stdio::from(file)).status();
+                            match child {
+                                Ok(status) if status.success() => {
+                                    return_result.status = StatusCode::Success;
+                                    Ok(return_result)
+                                }
+                                Ok(_) | Err(_) => {
+                                    return_result.status = StatusCode::Failure;
+                                    Err(return_result)
+                                }
+                            }
+                        }
+                        Err(e) => {
+                            return_result.status = StatusCode::Failure;
+                            return_result.output_str =
+                                Some(format!("Redirection file error: {}", e));
+                            Err(return_result)
+                        }
+                    }
                 } else {
-                    return_result.status = StatusCode::Failure;
-                    Err(return_result)
+                    let ret = cmd.status().unwrap_or_default();
+                    if ret.success() {
+                        return_result.status = StatusCode::Success;
+                        Ok(return_result)
+                    } else {
+                        return_result.status = StatusCode::Failure;
+                        Err(return_result)
+                    }
                 }
             }
         }
